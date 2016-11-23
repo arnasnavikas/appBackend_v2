@@ -10,25 +10,25 @@ var connectDB = require('./mongoDB/db');
 var selected_gallery = require('./routes/selected_gallery');
 var galerija = require('./routes/galerija');
 var mongo = require('./routes/mongo');
-
+var skaiciuokle = require('./routes/skaiciuokle');
+var login = require ('./routes/login');
 var app = express();
-
+/**connecting mongo database */
 connectDB();
-// view engine setup
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'jade');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+
+
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+// app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/galerija', galerija);
 app.use('/galerija/:id', selected_gallery);
+app.use('/skaiciuokle', skaiciuokle);
 app.use('/mongo', mongo);
+app.use('/login', login);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
