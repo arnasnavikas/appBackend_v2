@@ -13,9 +13,12 @@ var schema = new Schema({
                                      {  darbo_pavadinimas: {type: String, required: true},
                                         vnt_kaina:         {type: Number, required: true},
                                         mato_vnt:          {type: String, required: true},
-                                        suma:              {type: Number, required: true}
+                                        input:             {type: String, default: '0'},
+                                        suma:              {type: Number, required: true},
+                                        
                                      }
-                                    ]
+                                    ],
+                          tableSuma: {type: Number, default: '0'},
              });
 
 var skaiciuokleSchema = mongoose.model('table_structure', schema);

@@ -5,29 +5,37 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+
 var connectDB = require('./mongoDB/db');
 
 var selected_gallery = require('./routes/selected_gallery');
 var galerija = require('./routes/galerija');
-var mongo = require('./routes/mongo');
+var message = require('./routes/messages');
 var skaiciuokle = require('./routes/skaiciuokle');
 var login = require ('./routes/login');
 var app = express();
 /**connecting mongo database */
 connectDB();
 
+var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
 
+    next();
+}
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(allowCrossDomain);
 // app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/galerija', galerija);
 app.use('/galerija/:id', selected_gallery);
 app.use('/skaiciuokle', skaiciuokle);
-app.use('/mongo', mongo);
+app.use('/message', message);
 app.use('/login', login);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

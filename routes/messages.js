@@ -7,11 +7,12 @@ router.post("/", function(req, res, next){
 //   JSON from client
 var message = req.body.data;
 var fromClient=JSON.parse(message);
-
-var mailMessage = new messageModel({ name: fromClient.name,
-                                      email: fromClient.email,
-                                      message: fromClient.message,
-                                      confirm: fromClient.confirm
+console.log(fromClient);
+var mailMessage = new messageModel({ name: fromClient.formData.name,
+                                      email: fromClient.formData.email,
+                                      message: fromClient.formData.message,
+                                      confirm: fromClient.formData.confirm,
+                                      tableData: fromClient.tableData
                                     });
                                   
 async.waterfall([
@@ -23,7 +24,6 @@ async.waterfall([
         });
     }
     ],function(err,data) {
-        res.setHeader('Access-Control-Allow-Origin','*');
         // jei issaugant atsirado klaidu, grazinamas JSON su klaidu kodais
         if(err) {res.json({err: err}); return;};
 // send respons to client

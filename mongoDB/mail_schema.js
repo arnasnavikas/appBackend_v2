@@ -5,7 +5,8 @@ var schema = new Schema({ name: {type:String, required :true},
                           email: {type:String, required :true},
                           message: {type:String, required :true},
                           date: {type : Date, default : Date.now()},
-                          confirm: {type: Boolean, required: true}
+                          confirm: {type: Boolean, required: true},
+                          tableData: {type: Array, default: []}
              });
 
 var userMessage = mongoose.model('UserMail', schema);
