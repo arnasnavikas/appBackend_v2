@@ -2,7 +2,9 @@ var express = require ('express');
 var router = express.Router();
 var async = require ('async');
 var messageModel = require('../mongoDB/mail_schema');
-
+/**###################################################################
+* Save message to database
+* ################################################################### */ 
 router.post("/", function(req, res, next){
 //   JSON from client
 var message = req.body.data;
@@ -12,7 +14,8 @@ var mailMessage = new messageModel({ name: fromClient.formData.name,
                                       email: fromClient.formData.email,
                                       message: fromClient.formData.message,
                                       confirm: fromClient.formData.confirm,
-                                      tableData: fromClient.tableData
+                                      tableData: fromClient.tableData,
+                                      suma: fromClient.suma
                                     });
                                   
 async.waterfall([
@@ -29,28 +32,45 @@ async.waterfall([
 // send respons to client
         res.json({message: data, dataSaved: fromClient});
     });
-// get one message
-}).get('/:id',function(req, res, next){
+})
+/**###################################################################
+* Get one message
+* ################################################################### */ 
+.get('/:id',function(req, res, next){
     
     var id_param = req.params.id;
 //   finds message
     messageModel.find({_id: id_param},function(err,data){
-    res.setHeader('Access-Control-Allow-Origin','*');
         if(err) 
             res.json({message:'Cannot get data from user message', error:err});
         
       res.json({data: data});
     });
-// get all messages
-}).get('/',function(req,res,next){
-    messageModel.find(function(err,data){
-    res.setHeader('Access-Control-Allow-Origin','*');
+})
+/**###################################################################
+ * Get all messages
+ * ################################################################### */ 
+.get('/',function(req,res,next){
+    messageModel.find().sort({date: -1}).exec(function(err,data){
         if(err) 
             res.json({message:'Cannot get data from user message', error:err});
         
       res.json({data: data});
     });
 
+})
+/**###################################################################
+ * Delete message
+ * ################################################################### */ 
+.delete('/:id', function(req,res,next){
+    var id = req.params.id;
+    console.log(id);
+    messageModel.findOne({ "_id": id }).remove(function(err){
+        if(err)
+          res.json({error: err, message:'record not deleted!'});
+
+          res.json({message: 'mesage delete from database.'});
+    });
 });
 
 module.exports = router;

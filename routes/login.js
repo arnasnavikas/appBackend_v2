@@ -7,14 +7,11 @@ router.post('/', function(req, res, next) {
 var loginData = req.body.data;
 var jsonData=JSON.parse(loginData); 
 
-if(jsonData.name == 'Arnas' && jsonData.password=='password'){
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.json({login:'success', valid:true});
-}else{
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.json({login:'failed', valid:false});
-
-}
+  if(jsonData.name == 'Arnas' && jsonData.password=='password'){
+    res.json({login:'success', valid:true});
+  }else{
+    res.json({login:'failed', valid:false});
+  }
 
 });
 
