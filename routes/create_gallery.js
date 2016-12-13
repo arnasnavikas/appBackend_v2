@@ -1,6 +1,9 @@
 var express = require('express');
 var router = express.Router();
-var fs = require('fs');
+var fs = require('fs-extra');
+var async = require('async');
+var Readable = require('stream').Readable;
+var custom_paths = require('./paths');
 
 router.post('/', function(req,res,next){
 // data from client
@@ -9,26 +12,37 @@ var dataTo_JSON = JSON.parse(formData);
 var GalleryName = dataTo_JSON.pavadinimas;
 var GalleryDescription = dataTo_JSON.aprasymas; 
 
-    function ensureExists(path, mask, cb) {
-        if (typeof mask == 'function') { // allow the `mask` parameter to be optional
-            cb = mask;
-            mask = 0777;
-        }
-        fs.mkdir(path, mask, function(err) {
-            if (err) {
-                if (err.code == 'EEXIST') cb(null); // ignore the error if the folder already exists
-                else cb(err); // something else went wrong
-            } else cb(null); // successfully created folder
-        });
-    }       
 
-    ensureExists('/home/arnas/nodeJS/my-app/backend/public/images/'+GalleryName, 0744, function(err) {
-        if (err) // handle folder creation error
-            res.json({message: err, name: GalleryName});
-        else // we're all good
-            res.json({message: 'created', name: GalleryName});
+    async.waterfall([
+        function(call){
+            fs.mkdir(custom_paths.public_images_folder+GalleryName, function(err) {
+                                if (err){
+                                    if(err.code === 'EEXIST'){
+                                        call('Tokia galerija jau egzistuoja.');
+                                        return;
+                                    }else 
+                                        call(err);
+                                        return;
+                                }
+
+                                    call(null, GalleryName);
+                                });
+        },function(gallery,call){
+            fs.writeFile(custom_paths.public_images_folder+gallery+'/description.txt', GalleryDescription, function (err) {
+            if (err)
+                call(err);
+            else
+                call(null,null);
+            });
+        }
+    ],function(err,call){
+        if(err)
+            res.json({err:err});
+        else
+            res.json({message:"Gallery successfully created."});    
     });
 
-});
+});      
+
 
 module.exports = router;

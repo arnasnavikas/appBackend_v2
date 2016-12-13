@@ -1,40 +1,88 @@
 var fs = require ('fs-extra');
+var async = require ('async');
+var path = require('path');
+var custom_paths = require('../routes/paths');
+
 
 /**###############################################################################
- *   loop through files in given folder, return file with name index.jpg 
- * or index JPG
+ *   Search for index.jpg and description.txt files
  * ###############################################################################*/
 
   function getIndexPicture (folder_name,callback){
-      fs.readdir('/home/arnas/nodeJS/my-app/backend/public/images/'+folder_name+'/', function(err, files){
-            if(err) {callback(err); return};
-        (function iteraror(i){
-          // if no index.jpg was found return null
-            if(i>=files.length) {
-              callback(null, null);
-              return;
-            }
-            fs.stat('/home/arnas/nodeJS/my-app/backend/public/images/'+folder_name+'/'+files[i], function(err,file){
-              if(file.isFile() && files[i] =='index.jpg' || files[i] == 'index.JPG'){
-                var index_picture=files[i];
-                callback(null,index_picture);
+    async.waterfall([
+        // Find all files in folder
+        //********************************************************
+        function(call){
+          fs.readdir(custom_paths.public_images_folder+folder_name+'/', call);
+        // find index.jpg
+        //********************************************************
+        },function(files,call){
+          for(var x=0; x<=files.length; x++){
+          var index = '';
+                if(files[x] == 'index.jpg' || files[x] == 'index.JPG'){
+                  index = files[x];
+                  call(null, files, index);
+                  return;          
+                }
+                if(x==files.length){
+                  call(null, files, index);
+                  return;          
+                }
+          }
+          // find desciption.txt file
+        //********************************************************
+        },function(files, index, call){
+          var desciption = null;
+          for(var x=0; x<=files.length; x++){
+              if( files[x] == 'description.txt'){
+                desciption = files[x];
+                call(null, index, desciption );
                 return;
-              } 
-              else iteraror(i+1);
-            });
-          })(0);
-        });
+              }
+              if(x==files.length){
+                call(null, index, desciption);
+                return;          
+              }
+          }
+        // Read desciption.txt file
+        //********************************************************
+        },function(index, desciption, call){
+          var desciption_text = null;
+          if(desciption){
+            fs.readFile(custom_paths.public_images_folder+folder_name+'/'+desciption,'utf8',function(err,data){
+                  if(err){
+                    callback(null);
+                    return;
+                  }
+                  desciption_text = data;
+                  call(null, index, desciption_text );
+                  return;
+                });
+          }else
+              call(null, index, desciption_text );
+        }
+        // Send  function callback
+        //********************************************************
+      ],function(err,index ,desciption){
+          if(err){
+            callback(err)
+            return;
+          }
+            callback({index_img: index, description: desciption});
+            return;
+      });
       }
 
 module.exports = {
 
 /**###############################################################################
- * Returs files from specified folder
+ * Returs images files array with .jpg or .JPG extensions, from specified folder
+ * examlpe: [img1.jpg, img2.JPG, ...]
  * ###############################################################################*/
 
   load_album: function(album_name, callback){
 	// fs='File System' nuskaito duota direktorija ir grazina du parametrus : error ir file_lis
-	fs.readdir('/home/arnas/nodeJS/my-app/backend/public/images/'+album_name,function(error, $files){
+	fs.readdir(custom_paths.public_images_folder+album_name,function(error, $files){
 		// patikrina ar nuoskaitant direktorija neatsirado klaidu
 		// jei atsirado album_list() funkcija grazinamas error array
 			if(error){callback(error); return;}
@@ -49,17 +97,15 @@ module.exports = {
 					callback(null,photos);
 					return;
 				}
-
-				// fs stat pateikia informacijos apie nurodyta faila
-				fs.stat("/home/arnas/nodeJS/my-app/backend/public/images/"+album_name+"/"+$files[i],function(err, stats){
+       // adds to files_only[] array, only files with .jpg || .JPG extensions
+       //***************************************************************
+				fs.stat(custom_paths.public_images_folder+album_name+"/"+$files[i],function(err, stats){
 					if(err){callback(err); return;}
-          // patikrina ar failas kuri grazino stat funkcija yra aplankas
-					if(stats.isFile()){
-            // console.log(stats);
-						var img_src ='http://localhost:3000/images/'+album_name+'/'+ $files[i];
+          var img_src =custom_paths.images_location+album_name+'/'+ $files[i];
+					if(stats.isFile() && (path.extname($files[i])=='.jpg' || path.extname($files[i])=='.JPG')){
 						files_only.push({img_name: $files[i], img_src: img_src,
                              album_name: album_name, sukurta: stats.birthtime,
-                            size: stats.size }); 
+                             size: stats.size }); 
 				  	iterator(i+1);
           }else{
 				  	iterator(i+1);
@@ -74,7 +120,7 @@ module.exports = {
 * ###############################################################################*/
   
 	findFolders: function(folder_name, callback){
-    fs.readdir('/home/arnas/nodeJS/my-app/backend/public/'+folder_name, function(err, call){
+    fs.readdir(custom_paths.public_folder+folder_name, function(err, call){
       if(err) {callback(err); return;}
       callback(null,call);
     });
@@ -93,11 +139,12 @@ module.exports = {
         callback(null,folder_arr);
         return;
       }       
-          fs.stat('/home/arnas/nodeJS/my-app/backend/public/images/'+folders[i], function(err,folder){
+          fs.stat(custom_paths.public_images_folder+folders[i], function(err,folder){
             if(err){callback(err); return }
             // patikrina ar tai direktorija/ If true - save to folder_arr
             if(folder.isDirectory()){
-              folder_arr.push(folders[i]);
+              var folder_obj = {folder_name: folders[i], birth_time: folder.birthtime};
+              folder_arr.push(folder_obj);
               iterator(i+1);
             }else{ iterator(i+1)}
           });
@@ -110,24 +157,31 @@ module.exports = {
    * ###########################################################################*/
 
   folderLoop: function(folder_array, callback){
-  var folder_info=[];
-    (function iteraror(i){
-      if(i>=folder_array.length){
-        callback(null, folder_info);
-        return;
-      }
-      getIndexPicture(folder_array[i],function(err, data){
-        var title = folder_array[i].replace(/_/g, " ");
-        var image_src;
-        if(data){
-          image_src = 'http://localhost:3000/images/'+folder_array[i]+'/'+data;
-        }else{
-          image_src='http://icons.iconarchive.com/icons/oxygen-icons.org/oxygen/256/Places-folder-red-icon.png';
-        }
-        folder_info.push({folder:folder_array[i], image_src:image_src, title: title});
-        iteraror(i+1);
-      });
-    })(0);
-  }
+    var folder_info=[];
+      (function iteraror(i){
+            if(i>=folder_array.length){
+              callback(null, folder_info);
+              return;
+            }
+        getIndexPicture(folder_array[i].folder_name,function(data){
+          var title = folder_array[i].folder_name.replace(/_/g, " ");
+          var image_src;
+          // set index image of folder
+          //********************************************************
+          if(data.index_img != '')
+            image_src = custom_paths.images_location+folder_array[i].folder_name+'/'+data.index_img;
+          else
+            image_src='http://icons.iconarchive.com/icons/oxygen-icons.org/oxygen/256/Places-folder-red-icon.png';
+          //  JSON witch be send to client 
+          //********************************************************
+          folder_info.push({folder : folder_array[i].folder_name,
+                            image_src : image_src,
+                            title : title,
+                            sukurta : folder_array[i].birth_time,
+                            description : data.description });
+          iteraror(i+1);
+        });
+      })(0);
+    }
 
 }

@@ -10,6 +10,7 @@ var connectDB = require('./mongoDB/db');
 // var selected_gallery = require('./routes/selected_gallery');
 var galerija = require('./routes/galerija');
 var message = require('./routes/messages');
+var limit_messages = require('./routes/show_delete_messages');
 var skaiciuokle = require('./routes/skaiciuokle');
 var login = require ('./routes/login');
 var create_gallery = require('./routes/create_gallery');
@@ -42,6 +43,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/galerija', galerija);
 app.use('/skaiciuokle', skaiciuokle);
+app.use('/messages', limit_messages);
 app.use('/message', message);
 app.use('/login', login);
 app.use('/new_gallery', create_gallery);

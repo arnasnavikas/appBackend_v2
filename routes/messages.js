@@ -23,14 +23,15 @@ async.waterfall([
     function(call){
         mailMessage.save(function (err) {
             if(err)  call(err);
-            else  call(null,{confirm:'Record saved!'});
+            call(null,{confirm:'Record saved!'});
         });
     }
     ],function(err,data) {
         // jei issaugant atsirado klaidu, grazinamas JSON su klaidu kodais
-        if(err) {res.json({err: err}); return;};
-// send respons to client
-        res.json({message: data, dataSaved: fromClient});
+        if(err) 
+            res.json({err: err});
+        else
+            res.json({message: data, dataSaved: fromClient});
     });
 })
 /**###################################################################
@@ -41,36 +42,12 @@ async.waterfall([
     var id_param = req.params.id;
 //   finds message
     messageModel.find({_id: id_param},function(err,data){
-        if(err) 
-            res.json({message:'Cannot get data from user message', error:err});
-        
-      res.json({data: data});
-    });
-})
-/**###################################################################
- * Get all messages
- * ################################################################### */ 
-.get('/',function(req,res,next){
-    messageModel.find().sort({date: -1}).exec(function(err,data){
-        if(err) 
-            res.json({message:'Cannot get data from user message', error:err});
-        
-      res.json({data: data});
-    });
-
-})
-/**###################################################################
- * Delete message
- * ################################################################### */ 
-.delete('/:id', function(req,res,next){
-    var id = req.params.id;
-    console.log(id);
-    messageModel.findOne({ "_id": id }).remove(function(err){
         if(err)
-          res.json({error: err, message:'record not deleted!'});
-
-          res.json({message: 'mesage delete from database.'});
+            res.json({message:'Cannot get data from user message', error:err});
+        else
+            res.json({data: data});
     });
 });
+
 
 module.exports = router;

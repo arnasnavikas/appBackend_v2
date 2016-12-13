@@ -3,6 +3,8 @@ var router = express.Router();
 var fs = require ('fs-extra');
 var async = require ('async');
 var load_gallery = require('../routes_functions/galerija_functions');
+var custom_paths = require('./paths');
+
 
 /*##############################################################
  Loads pictures from selected folder
@@ -19,7 +21,10 @@ router.get('/:id', function(req, res, next) {
         } 
       ],function(err,call){
         // jei paskutine funkcja is async.waterfall grazina klaida
-          if(err) res.json({"err": err, message:"error from selected_gallery.js file."});
+          if(err){
+           res.json({"err": err, message:"error from selected_gallery.js file."});
+           return;
+          }
 
         // jei paskutine funkcija grazina duomenis
           res.json(call);
@@ -36,8 +41,11 @@ router.get('/:id', function(req, res, next) {
     load_gallery.isFolder(data, function(err,data){
       // sukonstruoja array ir issiuncia 
       load_gallery.folderLoop(data,function(err,data){
-                      if(err) res.send(err) ;
-                      res.json( data);
+                      if(err){
+                        res.send(err);
+                        return;
+                      }
+                        res.json( data);
       });
     });
   });
@@ -48,9 +56,11 @@ router.get('/:id', function(req, res, next) {
 .delete('/:folder', function(req,res,next){
     var folder = req.params.folder;
 
-      fs.remove('/home/arnas/nodeJS/my-app/backend/public/images/'+folder, function(err){
-        if(err) 
+      fs.remove(custom_paths.public_images_folder+folder, function(err){
+        if(err){
           res.json({error:err});
+          return;
+        }
           res.json({message:'deleted'});
       });
 /*##############################################################
@@ -62,7 +72,7 @@ router.get('/:id', function(req, res, next) {
     var x =0;
     for(x; x<to_JSON.images.length; x++){
 
-      fs.remove('/home/arnas/nodeJS/my-app/backend/public/images/'+to_JSON.folder+'/'+to_JSON.images[x], function(err){
+      fs.remove(custom_paths.public_images_folder+to_JSON.folder+'/'+to_JSON.images[x], function(err){
         if(err) {
           res.json({error:err});
           return;
