@@ -55,14 +55,23 @@ router.get('/:id', function(req, res, next) {
  ###############################################################*/
 .delete('/:folder', function(req,res,next){
     var folder = req.params.folder;
+    console.log(folder);
+    var parsed = folder.split(',');
+    console.log(parsed);
 
-      fs.remove(custom_paths.public_images_folder+folder, function(err){
+    var folder_length = parsed.length;
+    var x = 0;
+    for( var name of parsed){
+      fs.remove(custom_paths.public_images_folder+name, function(err){
         if(err){
           res.json({error:err});
           return;
         }
-          res.json({message:'deleted'});
       });
+        x++;
+      if(folder_length<=x)
+        res.json({message: 'Deleted all.' });
+    }
 /*##############################################################
  Delete selected pictures from  folder 
  ###############################################################*/
@@ -81,6 +90,20 @@ router.get('/:id', function(req, res, next) {
     }
 
      res.json({message:'Deleted all selected images.'});
+  }).post('/', function(req,res, next){
+
+    var body = JSON.parse(req.body.data);
+    console.log(body);
+
+    fs.rename(custom_paths.public_images_folder+body.old, 
+              custom_paths.public_images_folder+body.new_name, function(err){
+                if(err){
+                  res.json({message: err});
+                  return;
+                } 
+
+                res.json({message: 'renamed'});
+              });
   });
   
 

@@ -24,7 +24,6 @@ var GalleryDescription = dataTo_JSON.aprasymas;
                                         call(err);
                                         return;
                                 }
-
                                     call(null, GalleryName);
                                 });
         },function(gallery,call){
@@ -42,6 +41,17 @@ var GalleryDescription = dataTo_JSON.aprasymas;
             res.json({message:"Gallery successfully created."});    
     });
 
+}).put('/', function(req,res, next){
+
+    var body = JSON.parse(req.body.data);
+    var folder = body.folder;
+    var description = body.description;
+
+    fs.writeFile(custom_paths.public_images_folder+folder+"/description.txt", description, (err) => {
+        if (err) res.json({error: err});
+
+        res.json({message: 'description updated'});
+    });
 });      
 
 
