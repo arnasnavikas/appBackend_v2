@@ -3,66 +3,94 @@ var router = express.Router();
 var custom_paths = require('./paths');
 var fs = require('fs-extra');
 var async = require('async');
+var GalleryModel = require('../mongoDB/gallery_schema');
 
 router.post('/',function(req,res,next){
 var body = JSON.parse(req.body.data);
 console.log(body);
 async.waterfall([
-    /***************************** READ DIRECTORY ************************** */
+    /***************************** SEARCH FOR index.JPG IN DATABASE  ************************** */
     function(call){
-        fs.readdir(custom_paths.public_images_folder+body.folder, function(err,data){
-            if(err) call(err);
-            console.log('************** 1 ************');
+        GalleryModel.find({_id:body.gallery_id, gallery_images:{$elemMatch:{img_name:'index.JPG'}}},function(err,data){
+            if(err){
+                call(err);
+                return;
+            }
+            console.log(data);
             call(null,data);
         });
-    /***************************** FIND INDEX PICTURE ************************** */
-    },function(files,call){
-        var counter = 0;
-        var array_length = files.length;
-        var index = null;
-        for(counter; counter<=array_length; counter++){
-            if(files[counter] == 'index.JPG'){
-            console.log('************** 2 ************');
-                index = files[counter];
-                call(null, index);
-                return;
-            }
-            if(index != null || counter==array_length){
-            console.log('************** 3 ************');
-                call(null, index);
-                return;
-            }
-        }
-    /***************************** REANAME OLD INDEX PICTURE ************************** */
+    /***************************** UPDATE index.JPG IMAGE IN DATABASE  ************************** */
     },function(index,call){
-        if(index){
-            console.log('************** 4 ************');
-            fs.rename(custom_paths.public_images_folder+body.folder+'/'+index, 
-                        custom_paths.public_images_folder+body.folder+'/'+Date.now()+'.JPG', function(err){
-                            if(err){
-            console.log('************** 5 ************');
-                            call({error: err, mesage: 'cant rename old index.JPG'});
-                            return;
-                            } 
-            console.log('************** 6 ************');
-                            call(null,null);
-                        });
+        var new_name = Date.now()+'.JPG';
+        /** ******** IF index.JPG DONT EXIST CREATE NEW********* */
+        if(index.length == 0){
+            console.log('index not found');
+            GalleryModel.update({_id: body.gallery_id, "gallery_images._id":body.index_id},
+                                {$set:{"gallery_images.$.img_name":"index.JPG",
+                                       "gallery_images.$.img_dest":custom_paths.public_images_folder+body.folder+'/'+'index.JPG',
+                                       "gallery_images.$.img_src": custom_paths.images_location+body.folder+'/'+'index.JPG'
+                                }},function(err,data){
+                                    if(err){
+                                        call({error:err, mesage:'cant update new index.jpg'});
+                                        return;
+                                    }
+                                    console.log(data);
+                                    call(null, true, null);
+                                });
+        /** ******** IF index.JPG EXIST, UPDATE OLD index.JPG TO DEFAULT PICTURE ********* */
         }else{
-            console.log('************** 7 ************');
-            call(null,null);
-        }
-    /***************************** ADD INDEX  ************************** */
-    },function(par,call){
-        fs.rename(custom_paths.public_images_folder+body.folder+'/'+body.index, 
+            console.log('index found with _id: '+ body.index_id);
+            GalleryModel.update({_id: body.gallery_id, "gallery_images._id":body.index_id},
+                                {$set:{"gallery_images.$.img_name": new_name,
+                                       "gallery_images.$.img_dest":custom_paths.public_images_folder+body.folder+'/'+new_name,
+                                       "gallery_images.$.img_src": custom_paths.images_location+body.folder+'/'+new_name
+                                }},function(err,data){
+                                    if(err){
+                                        call({error:err, mesage:'cant update existing index.jpg'});
+                                        return;
+                                    }
+                                    console.log(data);
+                                    call(null, false, new_name);
+                                });
+
+                }
+    /***************************** READ GALLERY DIRECTORY FOR FILES   ************************** */
+    },function(status,name,call){
+        if(status){
+            console.log('writing new instance of index.jpg');
+            fs.rename(custom_paths.public_images_folder+body.folder+'/'+body.index, 
                   custom_paths.public_images_folder+body.folder+'/index.JPG', function(err){
                       if(err){
-            console.log('************** 8 ************');
+                        call({error: err, mesage: 'cant add new index.'});
+                        return;
+                      } 
+                      call(null, false);
+                  });
+        }else{
+            console.log('replacing old index.jpg to new with name: '+name);
+            console.log(custom_paths.public_images_folder+body.folder+'/index.JPG');
+            fs.rename(custom_paths.public_images_folder+body.folder+'/index.JPG', 
+                  custom_paths.public_images_folder+body.folder+'/'+name, function(err){
+                      if(err){
                         call({error: err, mesage: 'cant add index.'});
                         return;
                       } 
-            console.log('************** 9 ************');
+                      call(null, true);
+                  });
+        }
+    },function(status,call){
+        if(status){
+            fs.rename(custom_paths.public_images_folder+body.folder+'/'+body.index, 
+                  custom_paths.public_images_folder+body.folder+'/index.JPG', function(err){
+                      if(err){
+                        call({error: err, mesage: 'cant replace old index.'});
+                        return;
+                      } 
                       call(null, null);
                   });
+        }else{
+            call(null,null);
+        }
     }
 ],function(err,call){
     if(err){
