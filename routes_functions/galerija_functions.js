@@ -2,7 +2,7 @@ var fs = require ('fs-extra');
 var async = require ('async');
 var path = require('path');
 var custom_paths = require('../routes/paths');
-
+var async = require('async');
 
 /**###############################################################################
  *   Search for index.jpg and description.txt files
@@ -74,46 +74,6 @@ var custom_paths = require('../routes/paths');
       }
 
 module.exports = {
-
-/**###############################################################################
- * Returs images files array with .jpg or .JPG extensions, from specified folder
- * examlpe: [img1.jpg, img2.JPG, ...]
- * ###############################################################################*/
-
-  load_album: function(album_name, callback){
-	// fs='File System' nuskaito duota direktorija ir grazina du parametrus : error ir file_lis
-	fs.readdir(custom_paths.public_images_folder+album_name,function(error, $files){
-		// patikrina ar nuoskaitant direktorija neatsirado klaidu
-		// jei atsirado album_list() funkcija grazinamas error array
-			if(error){callback(error); return;}
-			// cia bus saugomi tik failai
-			var files_only=[];
-			// fukcija iteraror() issivecia pati save tol kol negauna return komandos
-			// kai gauna return, iskviecia sekancia kunkcija (0), kuri nutrukia funkcijos iterator()
-			//  darba
-			(function iterator(i){
-				if(i>=$files.length){
-					var photos=files_only;
-					callback(null,photos);
-					return;
-				}
-       // adds to files_only[] array, only files with .jpg || .JPG extensions
-       //***************************************************************
-				fs.stat(custom_paths.public_images_folder+album_name+"/"+$files[i],function(err, stats){
-					if(err){callback(err); return;}
-          var img_src =custom_paths.images_location+album_name+'/'+ $files[i];
-					if(stats.isFile() && (path.extname($files[i])=='.jpg' || path.extname($files[i])=='.JPG')){
-						files_only.push({img_name: $files[i], img_src: img_src,
-                             album_name: album_name, sukurta: stats.birthtime,
-                             size: stats.size }); 
-				  	iterator(i+1);
-          }else{
-				  	iterator(i+1);
-          }
-				});
-			})(0);// (0) - nutraukia programos darba;
-		});
-	},
 
 /**###############################################################################
 *  suranda visus failus ir folderius duotoje direktorijoje 

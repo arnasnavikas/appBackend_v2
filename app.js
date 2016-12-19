@@ -7,22 +7,18 @@ var bodyParser = require('body-parser');
 
 var connectDB = require('./mongoDB/db');
 // routes
-// var selected_gallery = require('./routes/selected_gallery');
-var galerija = require('./routes/galerija');
-var message = require('./routes/messages');
-var limit_messages = require('./routes/show_delete_messages');
+var gallery_main = require('./routes/gallery_main');
+var admin_messages = require('./routes/admin_messages');
+var client_messages = require('./routes/client_messages');
 var skaiciuokle = require('./routes/skaiciuokle');
 var login = require ('./routes/login');
-var create_gallery = require('./routes/create_gallery');
-var addPictures = require('./routes/addPictures');
+var gallery_create_new = require('./routes/gallery_create_new');
+var gallery_add_pictures = require('./routes/gallery_add_pictures');
+var gallery_add_index = require('./routes/gallery_add_index');
 //application
 var app = express();
 /**connecting mongo database */
 connectDB();
-
-
-// var DIR = '/home/arnas/nodeJS/my-app/backend/public/images/';
-// var upload = multer({dest: DIR});
 
 var allowCrossDomain = function(req, res, next) {
         res.setHeader("Access-Control-Allow-Methods", "POST, PUT, OPTIONS, DELETE, GET");
@@ -32,7 +28,6 @@ var allowCrossDomain = function(req, res, next) {
         next();
 }
 
-
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -41,13 +36,14 @@ app.use(allowCrossDomain);
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-app.use('/galerija', galerija);
+app.use('/galerija', gallery_main);
 app.use('/skaiciuokle', skaiciuokle);
-app.use('/messages', limit_messages);
-app.use('/message', message);
+app.use('/messages', admin_messages );
+app.use('/message', client_messages);
 app.use('/login', login);
-app.use('/new_gallery', create_gallery);
-app.use('/addPictures', addPictures);
+app.use('/new_gallery', gallery_create_new);
+app.use('/addPictures', gallery_add_pictures);
+app.use('/addindex', gallery_add_index);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

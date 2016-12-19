@@ -4,7 +4,9 @@ var fs = require('fs-extra');
 var async = require('async');
 var Readable = require('stream').Readable;
 var custom_paths = require('./paths');
-
+/*##############################################################
+    Create new gallery folder 
+ ###############################################################*/
 router.post('/', function(req,res,next){
 // data from client
 var formData = req.body.data;
@@ -40,7 +42,9 @@ var GalleryDescription = dataTo_JSON.aprasymas;
         else
             res.json({message:"Gallery successfully created."});    
     });
-
+/*##############################################################
+    Adds description.txt file
+ ###############################################################*/
 }).put('/', function(req,res, next){
 
     var body = JSON.parse(req.body.data);

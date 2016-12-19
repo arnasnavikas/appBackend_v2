@@ -10,6 +10,6 @@ var schema = new Schema({ name: {type:String, required :true},
                           suma: {type: String, default : '0'}
              });
 
-var userMessage = mongoose.model('UserMail', schema);
+var MessageModel = mongoose.model('UserMail', schema);
 
-module.exports = userMessage;
+module.exports = MessageModel;

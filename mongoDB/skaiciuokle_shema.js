@@ -21,6 +21,6 @@ var schema = new Schema({
                           tableSuma: {type: Number, default: '0'},
              });
 
-var skaiciuokleSchema = mongoose.model('table_structure', schema);
+var SkaiciuokleModel = mongoose.model('table_structure', schema);
 
-module.exports = skaiciuokleSchema;
+module.exports = SkaiciuokleModel;
