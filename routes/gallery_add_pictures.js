@@ -25,51 +25,28 @@ router.post('/:folder', upload.any(),  (req,res,next)=>{
                 /*********************** WRITES PICTURE FILE DO HARD DISK ***************** */
             function(call){
                 var pic_path = custom_paths.public_images_folder+folder+'/';
-                var pic_name = Date.now();
+                var pic_name = Date.now()+'.JPG';
                 var bufferStream = new stream.PassThrough();
                 bufferStream.end(new Buffer(files[0].buffer));
-                var writeFile = fs.createWriteStream(pic_path+pic_name+'.JPG');
+                var writeFile = fs.createWriteStream(pic_path+pic_name);
                 var pipe = bufferStream.pipe(writeFile);
                 writeFile.on('close', function () { 
                     console.log('finished');
-                    call(null, { destination : pic_path, img_name : pic_name} );
+                    call(null, pic_name);
                 });
-                /*********************** CREATES DESCRIPTION FILE FOR PICTURE ***************** */
-            },function(_path, call){
-                /*********************** CHECKS IF GALLERY EXISTS IN DATABASE ***************** */
-                GalleryModel.find({gallery_name:folder},function(err,result){
-                    if(err)
-                    call(err);
-
-                call(null,result,_path);
+                /*********************** ADD PICTURE TO DATABASE ***************** */
+            },function(result, call){
+                var img_obj ={  img_name: result,
+                                img_src: custom_paths.images_location+folder+'/'+result,
+                                size: files[0].size
+                             };
+                GalleryModel.update({route_name:folder},{$push:{gallery_images:img_obj}},function(err,data){
+                    if(err){
+                        call({error:err, message:'Cant push image object in database'});
+                        return;
+                    }
+                    call(null,{message:"image pushed to database."});
                 });
-                /*********************** WRITE PICTURE INFO TO DATABASE ***************** */
-            },function(result, _path, call){
-                var img_obj ={ img_name: _path.img_name+'.JPG',
-                            img_src: custom_paths.images_location+folder+'/'+_path.img_name+'.JPG',
-                            img_dest: custom_paths.public_images_folder+folder+'/'+_path.img_name+'.JPG',
-                            size: files[0].size
-                            };
-                if(result.length == 0){
-                    var gallery = new GalleryModel({
-                            gallery_name: folder,
-                            gallery_images: [img_obj]
-                            });
-
-                    gallery.save(function(err){
-                        if(err)
-                            call(err);
-                        call(null,null);
-                    });
-                }else{
-                GalleryModel.update({gallery_name: folder},{$push :{gallery_images: img_obj} },function(err,status){
-                    if(err)
-                        call(err);
-
-                    call(null,null)
-                });
-                }
-
             }
         ],function(err,data){
             if(err){
@@ -80,6 +57,32 @@ router.post('/:folder', upload.any(),  (req,res,next)=>{
         });
     }else
         res.json({message: 'no files detected'});
-    
+/*##########################################################
+* Loads image description
+############################################################ */
+}).get('/:galleryId/:pictureId',function(req,res,next){
+    var gallery_id = req.params['galleryId'];
+    var picture_id = req.params['pictureId'];
+
+  GalleryModel.find({_id: gallery_id},{gallery_images:{$elemMatch:{_id:picture_id}}},function(err,data){
+      if(err){
+          res.json({error:err, message:'Cant find description'});
+          return;
+      }
+
+    res.json({message: 'working', id:{id1: gallery_id, id2:picture_id}, data:data[0].gallery_images[0].description});
+  });
+/*##########################################################
+* Updates image description
+############################################################ */
+}).put('/',function(req,res,next){
+  var _body = JSON.parse(req.body.data);
+  GalleryModel.update({_id:_body.gallery_id ,"gallery_images._id":_body.image_id},{$set:{"gallery_images.$.description": _body.description}},function(err,data){
+                                        if(err){
+                                            res.json({error:err, message: 'Cant update descrition'});
+                                            return;
+                                        }
+                                            res.json({message:'Description updated.', data:data});
+                                    });
 });
   module.exports = router;
