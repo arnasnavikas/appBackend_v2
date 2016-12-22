@@ -16,6 +16,7 @@ var gallery_create_new = require('./routes/gallery_create_new');
 var gallery_add_pictures = require('./routes/gallery_add_pictures');
 var gallery_add_index = require('./routes/gallery_add_index');
 var gallery_delete = require('./routes/gallery_delete');
+var send_mail = require('./routes/send_mail');
 //application
 var app = express();
 /**connecting mongo database */
@@ -46,6 +47,7 @@ app.use('/new_gallery', gallery_create_new);
 app.use('/addPictures', gallery_add_pictures);
 app.use('/addindex', gallery_add_index);
 app.use('/galleryDelete', gallery_delete);
+app.use('/sendMail', send_mail);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

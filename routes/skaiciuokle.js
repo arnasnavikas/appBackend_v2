@@ -9,8 +9,10 @@ var skaiciuokle_schema = require('../mongoDB/skaiciuokle_shema');
 router.get('/', function(req, res, next) {
 
 skaiciuokle_schema.find(function(err,data){
-    if(err) 
+    if(err){
         res.json({message: err});
+        return;
+    }
     else
         res.json(data);
 });
@@ -26,14 +28,18 @@ async.waterfall([
             var tableData = JSON.parse(data);
             var newTable = new skaiciuokle_schema(tableData);
             newTable.save(function(err){
-               if(err) call(err);
-
+               if(err){
+                call({error: err, message:'Cant create new table'});
+                return;
+               } 
                call(null,{message: 'Table was saved to database.'});
            });
         }
 ],function(err,call){
-    if(err)
+    if(err){
         res.json({message: err});
+        return;
+    }
     else
         res.json({message: call});
  
@@ -51,16 +57,20 @@ async.waterfall([
         async.waterfall([
             function(call){
                 skaiciuokle_schema.update({_id : tableID}, { $set: { tableHead: tableHead , tableBody: tableBody, tableName: tableName}},
-                function (err,clb) {
-                    if(err) call(err);
-
-                    call(null, {message: 'Tabe updated.', callback: clb} );
+                function (err,data) {
+                    if(err){
+                        call({error:err, message:'table not udated.'});
+                        return;
+                    } 
+                    call(null, {message: 'Tabe updated.', data: data} );
                 }
             );
         }
         ],function(err,call){
-            if(err) res.json({error: err, message: 'table not updated'});
-
+            if(err){
+                res.json({error: err, message: 'table not updated'});
+                return;
+            } 
             res.json({message:'Tabe updated successfully.'});
         });
 /*#####################################################################
@@ -69,11 +79,13 @@ async.waterfall([
 }).delete('/:id', function(req,res,next){
     var tableID = req.params.id;
 
-    skaiciuokle_schema.find({_id: tableID}).remove(function(err){
-        if(err) 
+    skaiciuokle_schema.find({_id: tableID}).remove(function(err,data){
+        if(err){
             res.json({error:err, message: 'table not deleted'});
+            return;
+        }
         else
-        res.json({message:'deleted'});
+        res.json({message:'deleted', data:data});
     });
 });
 

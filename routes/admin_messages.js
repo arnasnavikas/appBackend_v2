@@ -45,7 +45,7 @@ router.get('/:page',function(req,res,next){
                 call(null, ofset, _number);
             }
         }, function(_ofset, size, call){
-                messageModel.find({},{confirm:0,message:0}).sort({date: -1}).skip(_ofset).limit(10).exec(function(err,data){
+                messageModel.find({},{confirm:0}).sort({date: -1}).skip(_ofset).limit(10).exec(function(err,data){
                     if(err) call({message:'i failed'});
 
                 call(null, {data:data, size: size});
