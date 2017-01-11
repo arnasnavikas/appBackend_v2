@@ -1,8 +1,8 @@
-var express = require ('express');
-var router = express.Router();
-var custom_paths = require('./paths');
-var async = require('async');
-var GalleryModel = require('../mongoDB/gallery_schema');
+var express         = require ('express');
+var router          = express.Router();
+var custom_paths    = require('./paths');
+var async           = require('async');
+var GalleryModel    = require('../mongoDB/gallery_schema');
 
 router.post('/',function(req,res,next){
 var body = JSON.parse(req.body.data);

@@ -10,13 +10,15 @@ var schema = new Schema({
                                        suma:              { type : String, default : 'suma'}
                                      },
                           tableBody: [
-                                     {  darbo_pavadinimas: {type: String, required: true},
-                                        vnt_kaina:         {type: Number, required: true},
-                                        mato_vnt:          {type: String, required: true},
+                                      {  
+                                        darbo_pavadinimas: {type: String, default: 'no name'},
+                                        vnt_kaina:         {type: Number, default:  0.00},
+                                        mato_vnt:          {type: String, default: 'null'},
                                         input:             {type: String, default: '0'},
-                                        suma:              {type: Number, required: true},
-                                        
-                                     }
+                                        suma:              {type: Number, default:  0.00},
+                                        aprasymas:         {type: String, default: 'no aprasymas'},
+                                        picture:           {type: String, default: undefined}
+                                      }
                                     ],
                           tableSuma: {type: Number, default: '0'},
              });

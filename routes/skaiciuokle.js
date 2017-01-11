@@ -1,53 +1,80 @@
-var express = require('express');
-var router = express.Router();
-var async = require ('async');
-var skaiciuokle_schema = require('../mongoDB/skaiciuokle_shema');
-
+var express         = require ('express');
+var router          = express.Router();
+var fs              = require ('fs-extra'); 
+var async           = require ('async');
+var custom_paths    = require ('./paths'); 
+var stream          = require ('stream');
+var multer          = require ('multer');
+var skaiciuokleFunctions = require ('./skaiciuokle-functions');
+var skaiciuokle_schema   = require ('../mongoDB/skaiciuokle_shema');
+var upload = multer({
+    inMemory: true
+});
 /*#####################################################################
  * Finds all tables from database, and sends to client 
  ######################################################################*/
 router.get('/', function(req, res, next) {
-
-skaiciuokle_schema.find(function(err,data){
-    if(err){
-        res.json({message: err});
-        return;
-    }
-    else
-        res.json(data);
-});
+    var _names = [];
+     try{
+        skaiciuokle_schema.find(function(err,data){
+            if(err){
+                res.json({error: err, message: 'Cand find tables in database.'});
+                throw new Error;
+            }
+            else{
+                for(var x=0; x<data.length; x++){
+                   _names.push(data[x].tableName);
+                }
+                res.json({data:data, names: _names});
+                return;
+            }
+        });
+     }catch(e){
+         res.json(e);
+     }
         
 /*#####################################################################
 * Creates new table 
  ######################################################################*/
-}).post('/', function(req, res,next){
-var data = req.body.data;
-
-async.waterfall([
-        function(call){
-            var tableData = JSON.parse(data);
-            var newTable = new skaiciuokle_schema(tableData);
-            newTable.save(function(err){
-               if(err){
-                call({error: err, message:'Cant create new table'});
-                return;
-               } 
-               call(null,{message: 'Table was saved to database.'});
-           });
-        }
-],function(err,call){
-    if(err){
-        res.json({message: err});
-        return;
-    }
-    else
-        res.json({message: call});
- 
-});
+}).post('/:tableName', upload.any(), function(req, res,next){
+    var folderName = req.params['tableName'];
+     async.waterfall([
+            function(call){
+                if(req.files){
+                 var fileName = req.files[0].originalname; 
+                 var buffer   = req.files[0].buffer;
+                    skaiciuokleFunctions.createFolder(folderName,fileName,buffer,function(data){
+                        console.log(call);
+                        call(null,data);
+                    });
+                }else
+                    call(null,null);
+            },function(message,call){
+                if(!message){
+                    var _data = JSON.parse(req.body.data);
+                    console.log(_data);
+                    var table = new skaiciuokle_schema(_data);
+                    table.save(function(err,data){
+                        if(err){
+                            call({error: err, message:'cant save table to database.'});
+                        }
+                        call(null,{database: data, fyleSystem: message});
+                    });
+                }else
+                 call(null,'picture saved');
+            }
+     ],function(err,call){
+        if(err){
+            res.json({message: err});
+            return;
+        }else
+            res.json({message: call});
+     });
+    
 /*#####################################################################
 * Updates existing table 
  ######################################################################*/
-}).post('/:id',function(req,res,next){
+}).put('/:id',function(req,res,next){
     var tableID= req.params.id;
     var tableObj = JSON.parse(req.body.data);
     var tableBody = tableObj.tableBody;

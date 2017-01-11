@@ -1,11 +1,11 @@
-var express = require('express');
-var multer = require('multer');
-var fs = require('fs-extra');
-var stream = require('stream');
-var router = express.Router();
-var custom_paths = require('./paths');
-var async = require('async');
-var GalleryModel = require('../mongoDB/gallery_schema');
+var express         = require ('express');
+var multer          = require ('multer');
+var fs              = require ('fs-extra');
+var stream          = require ('stream');
+var router          = express.Router();
+var custom_paths    = require ('./paths');
+var async           = require ('async');
+var GalleryModel    = require ('../mongoDB/gallery_schema');
 
 var upload = multer({
     inMemory: true
