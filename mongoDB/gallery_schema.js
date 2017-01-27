@@ -13,7 +13,7 @@ var schema = new Schema({
                           }],
                           birth_time: {type: Number, default: Date.now()},
                           aprasymas: {type: String, default: 'No descrition'},
-                          index_img: {type:String, default:'http://icons.iconarchive.com/icons/oxygen-icons.org/oxygen/256/Places-folder-red-icon.png'}
+                          index_img: {type:String, default:null}
              });
 
 var GalleryModel = mongoose.model('gallery', schema);

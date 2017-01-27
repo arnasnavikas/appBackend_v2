@@ -58,30 +58,13 @@ router.post('/:folder', upload.any(),  (req,res,next)=>{
     }else
         res.json({message: 'no files detected'});
 /*##########################################################
-* Loads image description
-############################################################ */
-}).get('/:galleryId/:pictureId',function(req,res,next){
-    var gallery_id = req.params['galleryId'];
-    var picture_id = req.params['pictureId'];
-
-  GalleryModel.find({_id: gallery_id},{gallery_images:{$elemMatch:{_id:picture_id}}},function(err,data){
-      if(err){
-          res.json({error:err, message:'Cant find description'});
-          return;
-      }
-
-    res.json({message: 'working', id:{id1: gallery_id, id2:picture_id}, data:data[0].gallery_images[0].description});
-  });
-/*##########################################################
 * Updates image description
 ############################################################ */
 }).put('/',function(req,res,next){
   var _body = JSON.parse(req.body.data);
+  console.log(_body);
   GalleryModel.update({_id:_body.gallery_id ,"gallery_images._id":_body.image_id},{$set:{"gallery_images.$.description": _body.description}},function(err,data){
-                                        if(err){
-                                            res.json({error:err, message: 'Cant update descrition'});
-                                            return;
-                                        }
+                                        if(err){ res.json(err); return; }
                                             res.json({message:'Description updated.', data:data});
                                     });
 });

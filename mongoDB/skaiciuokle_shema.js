@@ -17,7 +17,7 @@ var schema = new Schema({
                                         input:             {type: String, default: '0'},
                                         suma:              {type: Number, default:  0.00},
                                         aprasymas:         {type: String, default: 'no aprasymas'},
-                                        picture:           {type: String, default: undefined}
+                                        picture:           {type: String, default: null}
                                       }
                                     ],
                           tableSuma: {type: Number, default: '0'},

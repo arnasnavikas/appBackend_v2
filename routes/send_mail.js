@@ -1,10 +1,13 @@
-var email = require('emailjs');
-var express = require('express');
-var router = express.Router();
+var email        = require('emailjs');
+var express      = require('express');
+var router       = express.Router();
+var async        = require('async');
 var messageModel = require('../mongoDB/mail_schema');
 
-router.post('/',function(req,res,next){
-
+router.post('/:id',function(req,res,next){
+ var message_id = req.params["id"];
+var body = JSON.parse(req.body.data);
+console.log(body);
 var server 	= email.server.connect({
    user:	"arnoadaila@gmail.com", 
    password:"colapepsi", 
@@ -14,33 +17,64 @@ var server 	= email.server.connect({
 });
 
 var message	= {
-   text:	"i hope this works", 
-   from:	"you <username@your-email.com>", 
-   to:		"someone <arnoadaila@gmail.com>, another <another@your-email.com>",
+   text:	"", 
+   from:	"you <arnoadaila@gmail.com>", 
+   to:		body.email,
    cc:		"else <else@your-email.com>",
-   subject:	"testing emailjs",
+   subject:	 body.subject,
    attachment: 
    [
-      {data:"<html>i <i>hope</i> this works!</html>", alternative:true},
+      {data: body.message, alternative:true},
    ]
 };
- 
-server.send(message, function(err, message) {
-     
-    res.json({message:message, err:err});
-});
- 
+ async.parallel([
+     function(call){
+        messageModel.update({_id:message_id},{atsakymas:body.message},function(err,data){
+            if(err)
+                call({error: err});
+            call({message:'Znute atsakyta', data:data});
+        });
+     },function(call){
+        server.send(message, function(err, message) {
+            if(err)
+                call({error:err, message:'cant send email.'});
+            call({message: message});
+        });
+
+     }
+ ],function(err,call){
+     if(err){
+        res.json({err});
+        return;
+     }
+     res.json(call);
+ });
+ /**###################################################################
+* UPDATES MESSAGES AS READED
+* ################################################################### */ 
 }).put('/:id',function(req,res,next){
  
  var message_id = req.params["id"];
  var body = JSON.parse(req.body.data);
- messageModel.update({_id:message_id},{ziuretas:body.perskaityta, atsakytas:body.atsakyta },function(err,data){
+ messageModel.update({_id:message_id},{ziuretas:body.perskaityta},function(err,data){
      if(err){
-         res.json({error:err, message:'Cant udate message'});
+         res.json({error:err, message:'Cant update message'});
          return;
      }
 
     res.json({message:'sita zinute skaityta!!', id:message_id, data:data});
+ });
+ /**###################################################################
+* delete one message
+* ################################################################### */ 
+}).delete('/:id',function(req,res,next){
+    var id = req.params['id'];
+ messageModel.remove({_id:id},function(err,data){
+     if(err){
+         res.json({error:err, message:'Cant delete message'});
+         return;
+     }
+    res.json({message:'Zinute istrinta.'});
  });
 });
 
