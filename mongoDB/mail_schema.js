@@ -1,8 +1,8 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var schema = new Schema({ 
-                          email     : { type : String, required:false},
+var schema = new Schema({ group_id  : { type: String },
+                          email     : { type: String, required:false},
                           address   : { type: Object, required:false},
                           date      : { type: Date   , default: Date.now() },
                           confirm   : { type: Boolean, default:false },

@@ -8,20 +8,22 @@ var GalleryModel = require('../mongoDB/gallery_schema');
 /*##############################################################
     Create new gallery folder 
  ###############################################################*/
-router.post('/:name', function(req,res,next){
+router.post('/', function(req,res,next){
 // data structure
-/** { "pavadinimas" : "data",
- *    "aprasymas" : "data",
- *    "route_name" : 'nasm_sad_'
+/** { gallery_name : 'data',
+ *    aprasymas    : 'data',
+ *    route_name   : 'nasm_sad_',
+ *    group_name   : 'asd-asd',
+ *    group_id     : 'asd-asd'
  *  }
  */
+var _body = JSON.parse(req.body.data);
       /******************* CHECK IF PARAMETER FROM REQUEST BODY ARE VALID ************** */
-if(req.params.name != undefined){
-    var _body = JSON.parse(req.body.data);
+if(_body.route_name && _body.group_name){
     async.waterfall([
       /*********************** CREATE NEW FOLDER *********************** */
         function(call){
-            fs.mkdir(custom_paths.public_images_folder+_body.route_name, function(err) {
+            fs.mkdir(custom_paths.public_folder+_body.group_name+'/'+_body.route_name, function(err) {
                                 if (err){
                                     if(err.code === 'EEXIST'){
                                         call(err);
@@ -34,22 +36,16 @@ if(req.params.name != undefined){
                             });
       /*********************** CREATE NEW GALLERY DOCUMENT IN DATABASE ******************** */
         },function(empty,call){
+            console.log(_body);
             var new_gallery = new GalleryModel(_body);
                 new_gallery.save(function(err,data){
-                    if(err){
-                        call(err);
-                        return;
-                    }
+                    if(err){ call(err); return; }
                     call(null, data);
                 });
         }
     ],function(err,call){
-        if(err){
-            res.json({error:err});
-            return;
-        }
-        else
-            res.json({message:"Gallery successfully created.", data:call});    
+        if(err){res.json({error:err}); return;}
+        res.json({message:"Gallery successfully created.", data:call});    
     });
  }else{
      res.json({message:'bad params.'});
@@ -57,10 +53,11 @@ if(req.params.name != undefined){
 /*##############################################################
     UPDATE GALLERY NAME
  ###############################################################*/
-}).put('/:name', function(req,res,next){
+}).put('/:group/:name', function(req,res,next){
     if(req.params.name){
     var body = JSON.parse(req.body.data);
     var oldName = req.params.name;
+    var groupName = req.params['group'];
     var message ={ fyleSYS: undefined,
                    database: undefined
                  };
@@ -79,8 +76,8 @@ if(req.params.name != undefined){
             async.waterfall([
 /*********************** RENAME GALLERY IN FILE SYSTEM ************************ */
             function(call){
-                fs.rename(custom_paths.public_images_folder+oldName, 
-                        custom_paths.public_images_folder+body.route_name, function(err){
+                fs.rename(custom_paths.public_folder+groupName+'/'+oldName, 
+                        custom_paths.public_folder+groupName+'/'+body.route_name, function(err){
                             if(err){ call({error: err, message: 'cant rename in folder in fyle system'});
                                 return;
                             } 
@@ -96,7 +93,7 @@ if(req.params.name != undefined){
                 }
                 var pictures = data.gallery_images;
                 if(pictures.length > 0 ){
-                    var new_route = custom_paths.images_location+body.route_name+'/';
+                    var new_route = custom_paths.images_location+groupName+'/'+body.route_name+'/';
                     var new_index_img;
                     if(data.index_img){
                         var indexImgName = data.index_img.slice(-17);

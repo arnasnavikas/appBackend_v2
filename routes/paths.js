@@ -4,9 +4,9 @@
 var localhost = {
     public_folder           : '/home/arnas/nodeJS/my-app/backend/public/',
     public_images_folder    : '/home/arnas/nodeJS/my-app/backend/public/images/',
-    images_location         : 'http://localhost:3000/images/',
+    images_location         : 'http://localhost:3000/',
     table_images_location   : 'http://localhost:3000/tablePictures/',
-    // table_pictures_folder   : '/home/arnas/nodeJS/my-app/backend/public/tablePictures/'
+    
 };
 var realServer = {
     public_folder           : '/home/deploy/my_site/AppBackend/public/',

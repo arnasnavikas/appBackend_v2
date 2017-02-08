@@ -1,7 +1,8 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var schema = new Schema({ 
+var schema = new Schema({ group_id : String,
+                          group_name: String,
                           gallery_name: String,
                           route_name: String,
                           gallery_images: [{

@@ -7,9 +7,9 @@ var messageModel = require('../mongoDB/mail_schema');
 * ################################################################### */ 
 router.post("/", function(req, res, next){
 var body = JSON.parse(req.body.data);
-console.log(messageModel);
 console.log(body);
-var mailMessage = new messageModel({ 
+var mailMessage = new messageModel({
+                        group_id : body.group_id, 
                         address  : body.addres ,
                         email    : body.email,
                         forname  : body.forname ,
@@ -20,9 +20,8 @@ var mailMessage = new messageModel({
                         tableData: body.tableData,
                     });
         mailMessage.save(function (err,data) {
-            console.log(err);
-            if(err){ res.json({err: err}); return; }
-            res.json({message: 'message saved.',data:data});
+            if(err){ res.json(err); return; }
+            res.json(data);
         });
 })
 /**###################################################################

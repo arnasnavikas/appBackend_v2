@@ -6,37 +6,15 @@ var custom_paths = require('./paths');
 var GalleryModel = require('../mongoDB/gallery_schema');
 
 
-
-/*##############################################################
- Loads pictures from selected folder
- ###############################################################*/
-router.get('/:id', function(req, res, next) {
-  var folder_name = req.params.id;
-  GalleryModel.findOne({route_name: folder_name},{gallery_images:1,index_img:1},function(err,data){
-    if(err){
-       res.json({"err": err, message:"Cant load picture from database"});
-       return;
-    }
-       res.json(data);
-  });
-})
-/*##############################################################
- Loads all gallerys folders 
- ###############################################################*/
-.get('/', function(req, res, next) {
-   GalleryModel.find(function(err,data){
-     if(err){
-       res.json({message:'Cant load albums.', error: err});
-       return;
-     }
-     res.json(data);
-   });
 /*##############################################################
  Delete pictures from folder 
  ###############################################################*/
-}).put('/:gallery', function(req,res,next){
+router.put('/:group/:folder/:groupId', function(req,res,next){
   var body = JSON.parse(req.body.data);
-  var galleryName = req.params.gallery;
+  console.log(body);
+  var groupName = req.params.group;
+  var folderName = req.params.folder;
+  var groupId = req.params.groupId;
         (function iterator(i){
           if(i >= body.length){
             res.json({message: 'Pictures deleted successfuly.',data:body})
@@ -55,16 +33,17 @@ router.get('/:id', function(req, res, next) {
             }
             // removes picture from fyle sysytem by given picture name;
             ,function(image,call){
-              fs.remove(custom_paths.public_images_folder+galleryName+'/'+image.img_name, function(err){
+              fs.remove(custom_paths.public_folder+groupName+'/'+folderName+'/'+image.img_name, function(err){
                 if(err){ call(err); return; }
                 call(null,image._id);
               });
             // removes picture from database by given _id;
             },function(id,call){
-              GalleryModel.update({gallery_name: galleryName},
+              GalleryModel.update({route_name:folderName},
                                   {$pull:{gallery_images:{_id:id}}},
                                   function(err,data){
                                     if(err){ call(err); return; }
+                                    console.log(data);
                                     call(null,null);
                                   });
             }

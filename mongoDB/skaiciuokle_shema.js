@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var schema = new Schema({ 
+var schema = new Schema({ group_id: String,
                           tableName: String,
                           tableHead: { darbo_pavadinimas: { type : String, default :'Darbo pavadinimas'},
                                        vnt_kaina:         { type : String, default :'vnt-kaina' },

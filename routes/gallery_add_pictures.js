@@ -14,17 +14,18 @@ var upload = multer({
 /*##########################################################
 saving images to folder
 ############################################################ */
-router.post('/:folder', upload.any(),  (req,res,next)=>{
+router.post('/:folder/:sub/:id', upload.any(),  (req,res,next)=>{
 
     var files = req.files;
     if(files){
         // console.log(files);
         var folder = req.params.folder;
-
+        var subFolder = req.params.sub;
+        var folder_id = req.params.id;
         async.waterfall([
                 /*********************** WRITES PICTURE FILE DO HARD DISK ***************** */
             function(call){
-                var pic_path = custom_paths.public_images_folder+folder+'/';
+                var pic_path = custom_paths.public_folder+folder+'/'+subFolder+'/';
                 var pic_name = Date.now()+'.JPG';
                 var bufferStream = new stream.PassThrough();
                 bufferStream.end(new Buffer(files[0].buffer));
@@ -37,23 +38,18 @@ router.post('/:folder', upload.any(),  (req,res,next)=>{
                 /*********************** ADD PICTURE TO DATABASE ***************** */
             },function(result, call){
                 var img_obj ={  img_name: result,
-                                img_src: custom_paths.images_location+folder+'/'+result,
+                                img_src: custom_paths.images_location+folder+'/'+subFolder+'/'+result,
                                 size: files[0].size
                              };
-                GalleryModel.update({route_name:folder},{$push:{gallery_images:img_obj}},function(err,data){
-                    if(err){
-                        call({error:err, message:'Cant push image object in database'});
-                        return;
-                    }
+                GalleryModel.update({_id:folder_id},{$push:{gallery_images:img_obj}},function(err,data){
+                    if(err){ call(err); console.log(err); return; }
+                    console.log(data);
                     call(null,{message:"image pushed to database."});
                 });
             }
         ],function(err,data){
-            if(err){
-                res.json({error: err});
-                return;
-            }
-                res.json({file: files[0].originalname, message:data });
+            if(err){ res.json({error: err}); return; }
+            res.json({file: files[0].originalname, message:data });
         });
     }else
         res.json({message: 'no files detected'});

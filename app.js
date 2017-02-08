@@ -4,10 +4,9 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
 var connectDB = require('./mongoDB/db');
 // routes
-var gallery_main = require('./routes/gallery_main');
+var delete_pictures = require('./routes/delete_pictures');
 var admin_messages = require('./routes/admin_messages');
 var client_messages = require('./routes/client_messages');
 var skaiciuokle = require('./routes/skaiciuokle');
@@ -17,6 +16,11 @@ var gallery_add_pictures = require('./routes/gallery_add_pictures');
 var gallery_add_index = require('./routes/gallery_add_index');
 var gallery_delete = require('./routes/gallery_delete');
 var send_mail = require('./routes/send_mail');
+var get_gallerys = require('./routes/gallery_get')
+var get_pictures = require('./routes/pictures_get');
+var group_create = require('./routes/group_create');
+var group_delete = require('./routes/group_delete');
+var group_rename = require('./routes/group_rename');
 //application
 var app = express();
 /**connecting mongo database */
@@ -37,8 +41,12 @@ app.use(cookieParser());
 app.use(allowCrossDomain);
 app.use(express.static(path.join(__dirname, 'public')));
 
-
-app.use('/galerija', gallery_main);
+app.use('/group-rename',group_rename);
+app.use('/get-gallerys',get_gallerys);
+app.use('/group-delete',group_delete);
+app.use('/get-pictures',get_pictures);
+app.use('/create-group',group_create);
+app.use('/galerija', delete_pictures);
 app.use('/skaiciuokle', skaiciuokle);
 app.use('/messages', admin_messages );
 app.use('/message', client_messages);
@@ -48,6 +56,7 @@ app.use('/addPictures', gallery_add_pictures);
 app.use('/addindex', gallery_add_index);
 app.use('/galleryDelete', gallery_delete);
 app.use('/sendMail', send_mail);
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

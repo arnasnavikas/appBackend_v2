@@ -5,22 +5,13 @@ var async           = require ('async');
 var custom_paths    = require ('./paths'); 
 var skaiciuokle_schema   = require ('../mongoDB/skaiciuokle_shema');
 /*#####################################################################
- * Finds all tables from database, and sends to client 
+ * Finds all tables from database by group ID, and sends to client 
  ######################################################################*/
-router.get('/', function(req, res, next) {
-    var _names = [];
-        skaiciuokle_schema.find(function(err,data){
-            if(err){
-                res.json({error: err, message: 'Cand find tables in database.'});
-                return;
-            }
-                for(var x=0; x<data.length; x++){
-                   _names.push(data[x].tableName);
-                }
-                res.json({data:data, names: _names});
-            
+router.get('/:id', function(req, res, next) {
+        skaiciuokle_schema.find({group_id: req.params.id},function(err,data){
+            if(err){ res.json(err); return; }
+            res.json(data);
         });
-        
 /*#####################################################################
 * Creates new table 
  ######################################################################*/

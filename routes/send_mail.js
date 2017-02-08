@@ -5,9 +5,8 @@ var async        = require('async');
 var messageModel = require('../mongoDB/mail_schema');
 
 router.post('/:id',function(req,res,next){
- var message_id = req.params["id"];
+var message_id = req.params["id"];
 var body = JSON.parse(req.body.data);
-console.log(body);
 var server 	= email.server.connect({
    user:	"arnoadaila@gmail.com", 
    password:"colapepsi", 
@@ -20,7 +19,7 @@ var message	= {
    text:	"", 
    from:	"you <arnoadaila@gmail.com>", 
    to:		body.email,
-   cc:		"else <else@your-email.com>",
+   cc:		"else <arnoadaila@gmail.com>",
    subject:	 body.subject,
    attachment: 
    [
@@ -30,15 +29,13 @@ var message	= {
  async.parallel([
      function(call){
         messageModel.update({_id:message_id},{atsakymas:body.message},function(err,data){
-            if(err)
-                call({error: err});
-            call({message:'Znute atsakyta', data:data});
+            if(err){ call(err); return;}
+            call(data);
         });
      },function(call){
         server.send(message, function(err, message) {
-            if(err)
-                call({error:err, message:'cant send email.'});
-            call({message: message});
+            if(err){ call(err); return; }
+            call(message);
         });
 
      }
