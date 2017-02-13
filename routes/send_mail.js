@@ -40,39 +40,27 @@ var message	= {
 
      }
  ],function(err,call){
-     if(err){
-        res.json({err});
-        return;
-     }
+     if(err){res.json({err});return;}
      res.json(call);
  });
  /**###################################################################
 * UPDATES MESSAGES AS READED
 * ################################################################### */ 
 }).put('/:id',function(req,res,next){
- 
- var message_id = req.params["id"];
- var body = JSON.parse(req.body.data);
- messageModel.update({_id:message_id},{ziuretas:body.perskaityta},function(err,data){
-     if(err){
-         res.json({error:err, message:'Cant update message'});
-         return;
-     }
-
-    res.json({message:'sita zinute skaityta!!', id:message_id, data:data});
+ var id = req.params.id;
+ messageModel.update({_id:id},{ziuretas:true},function(err,data){
+     if(err){res.json(err);return;}
+    res.json(data);
  });
  /**###################################################################
 * delete one message
 * ################################################################### */ 
 }).delete('/:id',function(req,res,next){
     var id = req.params['id'];
- messageModel.remove({_id:id},function(err,data){
-     if(err){
-         res.json({error:err, message:'Cant delete message'});
-         return;
-     }
-    res.json({message:'Zinute istrinta.'});
- });
+    messageModel.remove({_id:id},function(err,data){
+        if(err){res.json(err);return;}
+        res.json(data);
+    });
 });
 
 module.exports = router;

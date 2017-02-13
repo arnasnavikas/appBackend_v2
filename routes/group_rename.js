@@ -10,11 +10,14 @@ router.put('/:id/:folder/:newName',function(req,res,next){
     var group_id = req.params.id;
     var folder = req.params.folder;
     var newName = req.params.newName;
+    var imageURL = JSON.parse(req.body.data);
     var routeName = newName.replace(/ /g,"-");
     async.parallel([
         function(call){
             categoryModel.update({_id:group_id},
-                                 {pavadinimas: newName,route:routeName},
+                                 {pavadinimas: newName,
+                                  route:routeName,
+                                  imgURL: imageURL},
                                  function(err,data){
                                      if(err){call(err);return;}
                                      call(null,data);
@@ -42,7 +45,8 @@ router.put('/:id/:folder/:newName',function(req,res,next){
                     }
                     GalleryModel.update({group_id:group_id},
                                     {$set:{ gallery_images : pictures, 
-                                            index_img      : new_index_img}},
+                                            index_img      : new_index_img,
+                                            group_name: routeName,}},
                                     function(err,renamed){ 
                                         if(err){call(err);return;}
                                         call(null,renamed);

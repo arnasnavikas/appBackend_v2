@@ -1,16 +1,14 @@
 var express = require ('express');
 var router = express.Router();
-var async = require ('async');
 var messageModel = require('../mongoDB/mail_schema');
 /**###################################################################
 * Save message to database
 * ################################################################### */ 
 router.post("/", function(req, res, next){
 var body = JSON.parse(req.body.data);
-console.log(body);
 var mailMessage = new messageModel({
                         group_id : body.group_id, 
-                        address  : body.addres ,
+                        address  : body.address,
                         email    : body.email,
                         forname  : body.forname ,
                         message  : body.message ,
@@ -28,18 +26,10 @@ var mailMessage = new messageModel({
 * Get one message
 * ################################################################### */ 
 .get('/:id',function(req, res, next){
-    
     var id_param = req.params.id;
-//   finds message
-    messageModel.find({_id: id_param},function(err,data){
-        if(err){
-            res.json({message:'Cannot get data from user message', error:err});
-            return;
-        }
-        else
-            res.json(data);
+    messageModel.findOne({_id: id_param},function(err,data){
+        if(err){res.json(err);return;}
+        res.json(data);
     });
 });
-
-
 module.exports = router;

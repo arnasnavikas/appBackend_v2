@@ -58,10 +58,12 @@ router.post('/:folder/:sub/:id', upload.any(),  (req,res,next)=>{
 ############################################################ */
 }).put('/',function(req,res,next){
   var _body = JSON.parse(req.body.data);
-  console.log(_body);
-  GalleryModel.update({_id:_body.gallery_id ,"gallery_images._id":_body.image_id},{$set:{"gallery_images.$.description": _body.description}},function(err,data){
-                                        if(err){ res.json(err); return; }
-                                            res.json({message:'Description updated.', data:data});
-                                    });
+  GalleryModel.update({_id:_body.gallery_id,
+                       "gallery_images._id":_body.image_id},
+                       {$set:{"gallery_images.$.description": _body.description}}
+                          ,function(err,data){
+                            if(err){ res.json(err);return;}
+                            res.json(data);
+                          });
 });
   module.exports = router;

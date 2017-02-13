@@ -1,10 +1,10 @@
 var express = require ('express');
 var router = express.Router();
+var fs = require('fs-extra');
 var async = require ('async');
 var categoryModel = require('../mongoDB/group-model')
-var fs = require('fs-extra');
-var customPath = require('./paths');
 var messageModel = require('../mongoDB/mail_schema');
+var customPath = require('./paths');
 router.post('/',function(req,res,next){
   var data = JSON.parse(req.body.data);
     async.waterfall([
