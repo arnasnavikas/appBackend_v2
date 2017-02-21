@@ -10,14 +10,17 @@ router.put('/:id/:folder/:newName',function(req,res,next){
     var group_id = req.params.id;
     var folder = req.params.folder;
     var newName = req.params.newName;
-    var imageURL = JSON.parse(req.body.data);
+    var data = JSON.parse(req.body.data);
+    console.log(data);
     var routeName = newName.replace(/ /g,"-");
     async.parallel([
         function(call){
             categoryModel.update({_id:group_id},
                                  {pavadinimas: newName,
                                   route:routeName,
-                                  imgURL: imageURL},
+                                  imgURL: data.imgURL,
+                                  aprasymas: data.aprasymas
+                                },
                                  function(err,data){
                                      if(err){call(err);return;}
                                      call(null,data);
@@ -31,35 +34,38 @@ router.put('/:id/:folder/:newName',function(req,res,next){
         },function(call){
                GalleryModel.findOne({group_id:group_id},function(err,data){
                 if(err){call(err); return;}
-                var pictures = data.gallery_images;
-                var new_index_img;
-                var new_route = customPath.images_location+routeName+'/'+data.route_name+'/';
-                if(data.index_img){
-                    var indexImgName = data.index_img.slice(-17);
-                    new_index_img = new_route+indexImgName;
-                }
-                if(pictures.length > 0 ){
-                    for(var i=0; i < pictures.length; i++){
-                        var pictureName = pictures[i].img_src.slice(-17);
-                        pictures[i].img_src = new_route+pictureName;
+                if(data){
+                    var pictures = data.gallery_images;
+                    var new_index_img;
+                    var new_route = customPath.images_location+routeName+'/'+data.route_name+'/';
+                    if(data.index_img){
+                        var indexImgName = data.index_img.slice(-17);
+                        new_index_img = new_route+indexImgName;
                     }
-                    GalleryModel.update({group_id:group_id},
-                                    {$set:{ gallery_images : pictures, 
-                                            index_img      : new_index_img,
-                                            group_name: routeName,}},
-                                    function(err,renamed){ 
-                                        if(err){call(err);return;}
-                                        call(null,renamed);
-                                    });
-                }else{
-                    GalleryModel.update({group_id:group_id},
-                                    {$set:{group_name: routeName,
-                                           index_img : new_index_img }},
-                                    function(err,renamed){
-                                        if(err){ call(err);return;}
-                                        call(null,renamed);
-                                    });
-                }
+                    if(pictures.length > 0 ){
+                        for(var i=0; i < pictures.length; i++){
+                            var pictureName = pictures[i].img_src.slice(-17);
+                            pictures[i].img_src = new_route+pictureName;
+                        }
+                        GalleryModel.update({group_id:group_id},
+                                        {$set:{ gallery_images : pictures, 
+                                                index_img      : new_index_img,
+                                                group_name: routeName,}},
+                                        function(err,renamed){ 
+                                            if(err){call(err);return;}
+                                            call(null,renamed);
+                                        });
+                    }else{
+                        GalleryModel.update({group_id:group_id},
+                                        {$set:{group_name: routeName,
+                                            index_img : new_index_img }},
+                                        function(err,renamed){
+                                            if(err){ call(err);return;}
+                                            call(null,renamed);
+                                        });
+                    }
+                }else
+                call(null,null);
             });
         }
     ],function(err,call){

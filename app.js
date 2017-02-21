@@ -21,6 +21,8 @@ var get_pictures = require('./routes/pictures_get');
 var group_create = require('./routes/group_create');
 var group_delete = require('./routes/group_delete');
 var group_rename = require('./routes/group_rename');
+var upload_pictures = require('./routes/upload-pictures');
+var my_resume = require('./routes/my-resume');
 //application
 var app = express();
 /**connecting mongo database */
@@ -41,7 +43,9 @@ app.use(cookieParser());
 app.use(allowCrossDomain);
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/create-resume',my_resume);
 app.use('/group-rename',group_rename);
+app.use('/upload-pictures',upload_pictures);
 app.use('/get-gallerys',get_gallerys);
 app.use('/group-delete',group_delete);
 app.use('/get-pictures',get_pictures);
