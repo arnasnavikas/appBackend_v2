@@ -5,6 +5,7 @@ var schema = new Schema({ vardas : { type: String},
                           amzius : { type: String },
                           issilavinimas : { type: String },
                           image  : { type: String },
+                          smallPic:{ type: String},
                           kita   : { type: String}
              });
 

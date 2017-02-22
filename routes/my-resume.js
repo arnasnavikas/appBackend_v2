@@ -16,6 +16,7 @@ router.post('/',function(req,res,next){
         myResumeModel.update({_id:data._id},{vardas: body.vardas,
                                              amzius: body.amzius,
                                              issilavinimas: body.issilavinimas,
+                                             smallPic: body.smallPic,
                                              image: body.image,
                                              kita: body.kita,
                                             },function(err,updated){
