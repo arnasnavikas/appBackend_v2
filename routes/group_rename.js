@@ -6,18 +6,15 @@ var GalleryModel = require('../mongoDB/gallery_schema');
 var fs = require('fs-extra');
 var customPath = require('./paths');
 
-router.put('/:id/:folder/:newName',function(req,res,next){
+router.put('/:id/:folder',function(req,res,next){
     var group_id = req.params.id;
     var folder = req.params.folder;
-    var newName = req.params.newName;
     var data = JSON.parse(req.body.data);
-    console.log(data);
-    var routeName = newName.replace(/ /g,"-");
     async.parallel([
         function(call){
             categoryModel.update({_id:group_id},
-                                 {pavadinimas: newName,
-                                  route:routeName,
+                                 {pavadinimas: data.pavadinimas,
+                                  route:data.route,
                                   imgURL: data.imgURL,
                                   aprasymas: data.aprasymas
                                 },
@@ -27,7 +24,7 @@ router.put('/:id/:folder/:newName',function(req,res,next){
                                  });
         },function(call){
             fs.rename(customPath.public_folder+folder,
-                      customPath.public_folder+routeName,function(err,data){
+                      customPath.public_folder+data.route,function(err,data){
                           if(err){call(err);return;}
                           call(null,data);
                       });
@@ -37,7 +34,7 @@ router.put('/:id/:folder/:newName',function(req,res,next){
                 if(data){
                     var pictures = data.gallery_images;
                     var new_index_img;
-                    var new_route = customPath.images_location+routeName+'/'+data.route_name+'/';
+                    var new_route = customPath.images_location+data.route+'/'+data.route_name+'/';
                     if(data.index_img){
                         var indexImgName = data.index_img.slice(-17);
                         new_index_img = new_route+indexImgName;
@@ -50,14 +47,14 @@ router.put('/:id/:folder/:newName',function(req,res,next){
                         GalleryModel.update({group_id:group_id},
                                         {$set:{ gallery_images : pictures, 
                                                 index_img      : new_index_img,
-                                                group_name: routeName,}},
+                                                group_name: data.route,}},
                                         function(err,renamed){ 
                                             if(err){call(err);return;}
                                             call(null,renamed);
                                         });
                     }else{
                         GalleryModel.update({group_id:group_id},
-                                        {$set:{group_name: routeName,
+                                        {$set:{group_name: data.route,
                                             index_img : new_index_img }},
                                         function(err,renamed){
                                             if(err){ call(err);return;}

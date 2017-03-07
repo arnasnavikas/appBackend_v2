@@ -13,4 +13,4 @@ var realServer = {
     images_location : 'http://46.101.120.14:3000/',
     private_images_location  : 'http://46.101.120.14:3000/private_images/'
 }
-module.exports = realServer;
+module.exports = localhost;

@@ -10,7 +10,6 @@ var delete_pictures = require('./routes/delete_pictures');
 var admin_messages = require('./routes/admin_messages');
 var client_messages = require('./routes/client_messages');
 var skaiciuokle = require('./routes/skaiciuokle');
-var login = require ('./routes/login');
 var gallery_create_new = require('./routes/gallery_create_new');
 var gallery_add_pictures = require('./routes/gallery_add_pictures');
 var gallery_add_index = require('./routes/gallery_add_index');
@@ -23,6 +22,7 @@ var group_delete = require('./routes/group_delete');
 var group_rename = require('./routes/group_rename');
 var upload_pictures = require('./routes/upload-pictures');
 var my_resume = require('./routes/my-resume');
+var get_pictures_by_gallery = require('./routes/get-pictures-by-gallery-name');
 //application
 var app = express();
 /**connecting mongo database */
@@ -43,6 +43,7 @@ app.use(cookieParser());
 app.use(allowCrossDomain);
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/pictures-by-gallery',get_pictures_by_gallery);
 app.use('/create-resume',my_resume);
 app.use('/group-rename',group_rename);
 app.use('/upload-pictures',upload_pictures);
@@ -54,7 +55,6 @@ app.use('/galerija', delete_pictures);
 app.use('/skaiciuokle', skaiciuokle);
 app.use('/messages', admin_messages );
 app.use('/message', client_messages);
-app.use('/login', login);
 app.use('/new_gallery', gallery_create_new);
 app.use('/addPictures', gallery_add_pictures);
 app.use('/addindex', gallery_add_index);

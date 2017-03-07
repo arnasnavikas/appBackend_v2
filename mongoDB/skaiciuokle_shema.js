@@ -17,10 +17,15 @@ var schema = new Schema({ group_id: String,
                                         input:             {type: String, default: '0'},
                                         suma:              {type: Number, default:  0.00},
                                         aprasymas:         {type: String, default: 'no aprasymas'},
-                                        picture:           {type: String, default: null}
-                                      }
+                                        darboSuma:         {type: Number, default: 0}, 
+                                        iseiga:            {type: Number, default: 0},
+                                        materialCost:      {type: Number, default: 0},
+                                        materialSuma:      {type: Number, default: 0}
+                                    }
                                     ],
-                          tableSuma: {type: Number, default: '0'},
+                          tableSuma: {type: Number, default: 0},
+                          materialSuma: { type: Number, default : 0},
+                          darboSuma: {type :Number, default: 0 }
              });
 
 var SkaiciuokleModel = mongoose.model('table_structure', schema);
