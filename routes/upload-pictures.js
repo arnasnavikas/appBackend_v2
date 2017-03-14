@@ -16,7 +16,6 @@ saving images to folder
 router.post('/', upload.any(),  (req,res,next)=>{
     var files = req.files;
     if(files){
-        console.log(files);
         async.waterfall([
                 /*********************** WRITES PICTURE FILE DO HARD DISK ***************** */
             function(call){
@@ -27,8 +26,6 @@ router.post('/', upload.any(),  (req,res,next)=>{
                 var writeFile = fs.createWriteStream(pic_path+pic_name);
                 var pipe = bufferStream.pipe(writeFile);
                 writeFile.on('close', function () { 
-                    console.log('finished');
-                    console.log('picture writed');
                     call(null, pic_name);
                 });
                 /*********************** ADD PICTURE TO DATABASE ***************** */
@@ -39,8 +36,7 @@ router.post('/', upload.any(),  (req,res,next)=>{
                              };
                 var newPicture = new imagesModel(img_obj);
                 newPicture.save(function(err,data){
-                    if(err){console.log(err); call(err);return;}
-                    console.log(data);
+                    if(err){call(err);return;}
                     call(null,data);
                 });
             }

@@ -11,7 +11,6 @@ var GalleryModel = require('../mongoDB/gallery_schema');
  ###############################################################*/
 router.put('/:group/:folder/:groupId', function(req,res,next){
   var body = JSON.parse(req.body.data);
-  console.log(body);
   var groupName = req.params.group;
   var folderName = req.params.folder;
   var groupId = req.params.groupId;
@@ -27,7 +26,6 @@ router.put('/:group/:folder/:groupId', function(req,res,next){
                                    {"gallery_images.$":1},
                                                function(err,data){
                                                  if(err){call(err);return;}
-                                                 console.log(data);
                                                  call(null,data.gallery_images[0]);
                                                });
             }
@@ -43,7 +41,6 @@ router.put('/:group/:folder/:groupId', function(req,res,next){
                                   {$pull:{gallery_images:{_id:id}}},
                                   function(err,data){
                                     if(err){ call(err); return; }
-                                    console.log(data);
                                     call(null,null);
                                   });
             }

@@ -15,10 +15,8 @@ var upload = multer({
 saving images to folder
 ############################################################ */
 router.post('/:folder/:sub/:id', upload.any(),  (req,res,next)=>{
-
     var files = req.files;
     if(files){
-        // console.log(files);
         var folder = req.params.folder;
         var subFolder = req.params.sub;
         var folder_id = req.params.id;
@@ -32,7 +30,6 @@ router.post('/:folder/:sub/:id', upload.any(),  (req,res,next)=>{
                 var writeFile = fs.createWriteStream(pic_path+pic_name);
                 var pipe = bufferStream.pipe(writeFile);
                 writeFile.on('close', function () { 
-                    console.log('finished');
                     call(null, pic_name);
                 });
                 /*********************** ADD PICTURE TO DATABASE ***************** */
@@ -42,8 +39,7 @@ router.post('/:folder/:sub/:id', upload.any(),  (req,res,next)=>{
                                 size: files[0].size
                              };
                 GalleryModel.update({_id:folder_id},{$push:{gallery_images:img_obj}},function(err,data){
-                    if(err){ call(err); console.log(err); return; }
-                    console.log(data);
+                    if(err){ call(err);return; }
                     call(null,{message:"image pushed to database."});
                 });
             }

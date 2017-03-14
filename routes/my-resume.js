@@ -29,8 +29,7 @@ router.post('/',function(req,res,next){
 .get('/',function(req,res,next){
     myResumeModel.findOne(function(err,data){
         if(err){res.json(err);return;}
-        console.log(data);
-    res.json(data);
+        res.json(data);
     });
 });
 

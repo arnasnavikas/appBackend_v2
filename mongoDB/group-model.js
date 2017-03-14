@@ -2,6 +2,8 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var schema = new Schema({ newMessages : { type: Number},
+                          gallerys    : { type: Number},
+                          tables      : { type: Number},
                           pavadinimas : { type: String, required:true },
                           imgURL      : { type: String },
                           route       : { type: String },

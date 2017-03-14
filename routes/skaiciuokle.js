@@ -44,9 +44,9 @@ put('/:id',function(req,res,next){
 /*#####################################################################
 * Deletes existing table 
 */
-}).delete('/:id', function(req,res,next){
-    var tableID = req.params.id;
-    skaiciuokle_schema.find({_id: tableID}).remove(function(err,data){
+}).put('/', function(req,res,next){
+    var tablesID = JSON.parse(req.body.data);
+    skaiciuokle_schema.remove({_id:{$in:tablesID}},function(err,data){
         if(err){res.json(err);return;}
         res.json(data);
     });

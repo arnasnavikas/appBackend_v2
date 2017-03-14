@@ -4,17 +4,19 @@ var fs = require('fs-extra');
 var async = require ('async');
 var categoryModel = require('../mongoDB/group-model')
 var messageModel = require('../mongoDB/mail_schema');
+var galleryModel = require('../mongoDB/gallery_schema');
+var tableModel = require('../mongoDB/skaiciuokle_shema')
 var customPath = require('./paths');
 router.post('/',function(req,res,next){
   var data = JSON.parse(req.body.data);
-    async.waterfall([
+    async.parallel([
         function(call){
             fs.mkdir(customPath.public_folder+data.route,function(err,data){
                 if(err){ call(err);}
                 call(null,data);
             });
         },
-        function(dummy,call){
+        function(call){
             var newGroup = new categoryModel(data);
             newGroup.save(function(err,data){
                 if(err){ call(err); return;}
@@ -44,7 +46,7 @@ router.post('/',function(req,res,next){
     async.waterfall([
         function(call){
             categoryModel.find(function(err,data){
-                if(err){call(err);}
+                if(err){call(err);return;}
                 call(null,data);
             });
         },function(data,call){
@@ -55,17 +57,36 @@ router.post('/',function(req,res,next){
                    call(null,newData);
                    return;
                }
-               messageModel.find({group_id:data[i]._id},function(err,message){
-                   if(err)
-                     call(err);
-                   for(var ii in message){
-                     if(!message[ii].ziuretas)
-                         newMailLength +=1;
-                   }
-                data[i].newMessages = newMailLength;
-                newData.push(data[i]);
-                repeat(i+=1);
-               });
+            async.parallel([
+                function(clb){
+                    messageModel.find({group_id:data[i]._id},function(err,message){
+                        if(err){call(err); return;}
+                        for(var ii in message){
+                            if(!message[ii].ziuretas)
+                                newMailLength +=1;
+                        }
+                        clb(null,newMailLength);
+                    });
+
+               },function(clb){
+                    galleryModel.find({group_id:data[i]._id},function(err,gallerys){
+                        if(err){call(err); return;}
+                        clb(null,gallerys.length);
+                    });
+               },function(clb){
+                    tableModel.find({group_id:data[i]._id},function(err,tables){
+                        if(err){call(err); return;}
+                        clb(null,tables.length);
+                    });
+               }],function(err,clb){
+                   if(err){call(err);return;}
+                    data[i].newMessages = clb[0];
+                    data[i].gallerys = clb[1];
+                    data[i].tables = clb[2];
+                   console.log(data[i]);
+                    newData.push(data[i]);
+                    repeat(i+=1);
+               })
            })(0);
         }
     ],function(err,call){

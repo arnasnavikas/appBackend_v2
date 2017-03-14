@@ -36,7 +36,6 @@ if(_body.route_name && _body.group_name){
                             });
       /*********************** CREATE NEW GALLERY DOCUMENT IN DATABASE ******************** */
         },function(empty,call){
-            console.log(_body);
             var new_gallery = new GalleryModel(_body);
                 new_gallery.save(function(err,data){
                     if(err){ call(err); return; }
