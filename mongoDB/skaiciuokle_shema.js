@@ -19,6 +19,7 @@ var schema = new Schema({ group_id: String,
                                         aprasymas:         {type: String, default: 'no aprasymas'},
                                         darboSuma:         {type: Number, default: 0}, 
                                         iseiga:            {type: Number, default: 0},
+                                        hidden:            {type: Boolean, default: true},
                                         materialCost:      {type: Number, default: 0},
                                         materialSuma:      {type: Number, default: 0}
                                     }

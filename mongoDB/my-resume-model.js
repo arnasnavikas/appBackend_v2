@@ -4,9 +4,9 @@ var Schema = mongoose.Schema;
 var schema = new Schema({ vardas : { type: String},
                           amzius : { type: String },
                           issilavinimas : { type: String },
-                          image  : { type: String },
-                          smallPic:{ type: String},
-                          kita   : { type: String}
+                          pomegiai : { type: String},
+                          pazymejimai: [{foto:String,
+                                        description:String}]
              });
 
 var MyResumeModel = mongoose.model('my_resume', schema);
