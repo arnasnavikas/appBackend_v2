@@ -11,9 +11,11 @@ router.post('/',function(req,res,next){
   var data = JSON.parse(req.body.data);
     async.parallel([
         function(call){
-            fs.mkdir(customPath.public_folder+data.route,function(err,data){
-                if(err){ call(err);}
-                call(null,data);
+            let route = customPath.public_folder+'/'+data.folder_name
+            fs.mkdir(route,function(err,data){
+                if(err){ call(err); return;}
+                console.log(Date.now())
+                call(null, data);
             });
         },
         function(call){
@@ -83,7 +85,7 @@ router.post('/',function(req,res,next){
                     data[i].newMessages = clb[0];
                     data[i].gallerys = clb[1];
                     data[i].tables = clb[2];
-                   console.log(data[i]);
+                //    console.log(data[i]);
                     newData.push(data[i]);
                     repeat(i+=1);
                })

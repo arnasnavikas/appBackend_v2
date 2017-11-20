@@ -5,6 +5,7 @@ var schema = new Schema({ group_id : String,
                           group_name: String,
                           gallery_name: String,
                           route_name: String,
+                          folder_name: String,
                           gallery_images: [{
                                             img_name:    {type: String, default: 'no data'},
                                             img_src:     {type: String, default: 'no data'},

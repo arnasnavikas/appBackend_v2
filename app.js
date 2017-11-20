@@ -48,7 +48,7 @@ app.use('/create-resume',my_resume);
 app.use('/group-rename',group_rename);
 app.use('/upload-pictures',upload_pictures);
 app.use('/get-gallerys',get_gallerys);
-app.use('/group-delete',group_delete);
+app.use('/group-delete/',group_delete);
 app.use('/get-pictures',get_pictures);
 app.use('/create-group',group_create);
 app.use('/galerija', delete_pictures);

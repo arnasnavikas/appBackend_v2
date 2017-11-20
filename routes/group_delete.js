@@ -11,69 +11,48 @@ var tableModel = require('../mongoDB/skaiciuokle_shema');
 /*##############################################################
  Deletes groups that specified in data:[] array
  ###############################################################*/
-router.put('/',function(req,res,next){
-    var groups = JSON.parse(req.body.data);
-    var responseInfo = [];
-   (function repeat(i){
-       if(i >= groups.length){
-        res.json({ids:responseInfo});
-        return;
-       }
-       console.log(groups[i]);
+router.put('/:id/:folderName',function(req,res,next){
+    let group_id = req.params.id
+    let folder =  req.params.folderName
         async.parallel([
+            /** 1) finds group in database
+             *  2) delete group folder by route name from fyle sysytem
+             *  3) deletes group from database
+             */
             function(call){
-                /** 1) finds group in database
-                 *  2) delete group folder by route name from fyle sysytem
-                 *  3) deletes group from database
-                 */
-                async.waterfall([
-                    function(clb){
-                        groupModel.findOne({_id:groups[i]},function(err,group){
-                            if(err){console.log(err); call(err);return;}
-                            console.log(group);
-                            clb(null,group);
-                        });
-                    },function(group,clb){
-                        fs.remove(customPaths.public_folder+group.route,function(err){
-                            if(err){call(err);return;}
-                            clb(null,group);
-                        });
+                fs.remove(customPaths.public_folder+'/'+folder,function(err){
+                    if(err){call(err);return;}
+                    call(null,'removed');
+                });
 
-                    },function(group,clb){
-                       groupModel.remove({_id:group._id},function(err,data){
-                           if(err){call(err); return;}
-                           clb(null,data);
-                       });
-                    }
-                ],function(err,clb){
-                    if(err){call(err);return;}
-                    call(null,clb);
-                });
+            },function(call){
+               groupModel.remove({_id:group_id},function(err,data){
+                   if(err){call(err); return;}
+                   call(null,data);
+               });
+            },function(call){
                 /** deletes all messages from database that beolong to group */
+            messageModel.remove({group_id:{$in:group_id}},function(err,data){
+                if(err){call(err);return;}
+                call(null,data);
+            });
+            /** deletes all gallerys from database that beolong to group */
             },function(call){
-                messageModel.remove({group_id:{$in:groups[i]}},function(err,data){
-                    if(err){call(err);return;}
-                    call(null,data);
-                });
-                /** deletes all gallerys from database that beolong to group */
-            },function(call){
-                galleryModel.remove({group_id:{$in:groups[i]}},function(err,data){
+                galleryModel.remove({group_id:{$in:group_id}},function(err,data){
                     if(err){call(err);return;}
                     call(null,data);
                 });
                 /** deletes all tables from database that beolong to group */
             },function(call){
-                tableModel.remove({group_id:{$in:groups[i]}},function(err,data){
+                tableModel.remove({group_id:{$in:group_id}},function(err,data){
                     if(err){call(err);return;}
                     call(null,data);
                 });
             }   
         ],function(err,call){
             if(err){console.log('this is error'); res.json(err);return;}
-            responseInfo.push(call);
-            repeat(i+1);
+            res.json(call);
         });
-   })(0)
 });
 
 module.exports = router;

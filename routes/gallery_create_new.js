@@ -4,7 +4,7 @@ var fs = require('fs-extra');
 var async = require('async');
 var custom_paths = require('./paths');
 var GalleryModel = require('../mongoDB/gallery_schema');
-
+var GroupModel = require('../mongoDB/group-model');
 /*##############################################################
     Create new gallery folder 
  ###############################################################*/
@@ -14,16 +14,15 @@ router.post('/', function(req,res,next){
  *    aprasymas    : 'data',
  *    route_name   : 'nasm_sad_',
  *    group_name   : 'asd-asd',
- *    group_id     : 'asd-asd'
+ *    group_id     : 'asd-asd',
+ *    folder_name  : 'asdasd'
  *  }
  */
-var _body = JSON.parse(req.body.data);
-      /******************* CHECK IF PARAMETER FROM REQUEST BODY ARE VALID ************** */
-if(_body.route_name && _body.group_name){
-    async.waterfall([
+var body = JSON.parse(req.body.data);
+    async.parallel([
       /*********************** CREATE NEW FOLDER *********************** */
         function(call){
-            fs.mkdir(custom_paths.public_folder+_body.group_name+'/'+_body.route_name, function(err) {
+            fs.mkdir(custom_paths.public_folder+'/'+body.group_name+'/'+body.folder_name, function(err) {
                                 if (err){
                                     if(err.code === 'EEXIST'){
                                         call(err);
@@ -35,20 +34,19 @@ if(_body.route_name && _body.group_name){
                                 call(null, 'folder created');
                             });
       /*********************** CREATE NEW GALLERY DOCUMENT IN DATABASE ******************** */
-        },function(empty,call){
-            var new_gallery = new GalleryModel(_body);
-                new_gallery.save(function(err,data){
-                    if(err){ call(err); return; }
-                    call(null, data);
-                });
-        }
-    ],function(err,call){
-        if(err){res.json({error:err}); return;}
-        res.json({message:"Gallery successfully created.", data:call});    
+    },function(call){
+        var new_gallery = new GalleryModel(body);
+        new_gallery.save(function(err,data){
+            if(err){ call(err); return; }
+            call(null, data);
+        });
+        /*********************** update gallery number in group model ******************** */
+    }],function(err,call){
+        if(err){res.json(err); return;}
+        else
+            res.json(call);    
     });
- }else{
-     res.json({message:'bad params.'});
- }
+ 
 /*##############################################################
     UPDATE GALLERY NAME
  ###############################################################*/
