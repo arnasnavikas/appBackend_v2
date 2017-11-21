@@ -43,23 +43,23 @@ app.use(cookieParser());
 app.use(allowCrossDomain);
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/pictures-by-gallery',get_pictures_by_gallery);
+app.use('/addPictures', gallery_add_pictures);
+app.use('/addindex', gallery_add_index);
 app.use('/create-resume',my_resume);
-app.use('/group-rename',group_rename);
-app.use('/upload-pictures',upload_pictures);
-app.use('/get-gallerys',get_gallerys);
-app.use('/group-delete/',group_delete);
-app.use('/get-pictures',get_pictures);
 app.use('/create-group',group_create);
+app.use('/galleryDelete', gallery_delete);
+app.use('/get-gallerys',get_gallerys);
+app.use('/get-pictures',get_pictures);
+app.use('/group-delete/',group_delete);
+app.use('/group-rename',group_rename);
 app.use('/galerija', delete_pictures);
-app.use('/skaiciuokle', skaiciuokle);
 app.use('/messages', admin_messages );
 app.use('/message', client_messages);
 app.use('/new_gallery', gallery_create_new);
-app.use('/addPictures', gallery_add_pictures);
-app.use('/addindex', gallery_add_index);
-app.use('/galleryDelete', gallery_delete);
+app.use('/pictures-by-gallery',get_pictures_by_gallery);
 app.use('/sendMail', send_mail);
+app.use('/skaiciuokle', skaiciuokle);
+app.use('/upload-pictures',upload_pictures);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

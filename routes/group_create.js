@@ -33,9 +33,9 @@ router.post('/',function(req,res,next){
 /**#############################################
  * suranda viena grupe
  */
-.get('/:route',function(req,res,next){
-    var route = req.params.route;
-        categoryModel.findOne({route:route},function(err,data){
+.get('/:group_id',function(req,res,next){
+    var group_id = req.params.group_id;
+        categoryModel.findOne({_id:group_id},function(err,data){
             if(err){res.json(err); return;}
             res.json(data);
         });

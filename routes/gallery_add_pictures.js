@@ -23,7 +23,7 @@ router.post('/:folder/:sub/:id', upload.any(),  (req,res,next)=>{
         async.waterfall([
                 /*********************** WRITES PICTURE FILE DO HARD DISK ***************** */
             function(call){
-                var pic_path = custom_paths.public_folder+folder+'/'+subFolder+'/';
+                var pic_path = custom_paths.public_folder+'/'+folder+'/'+subFolder+'/';
                 var pic_name = Date.now()+'.JPG';
                 var bufferStream = new stream.PassThrough();
                 bufferStream.end(new Buffer(files[0].buffer));
