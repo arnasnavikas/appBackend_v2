@@ -7,8 +7,8 @@ var schema = new Schema({ group_id : String,
                           route_name: String,
                           folder_name: String,
                           gallery_images: [{
-                                            img_name:    {type: String, default: 'no data'},
-                                            img_src:     {type: String, default: 'no data'},
+                                            name:        {type: String, default: 'no data'},
+                                            imgURL:      {type: String, default: 'no data'},
                                             description: {type: String, default: ''},
                                             size:        {type: Number, default: 0        },
                                             sukurta:     {type: Number, default: Date.now() }

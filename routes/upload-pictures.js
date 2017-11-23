@@ -61,8 +61,8 @@ router.post('/', upload.any(),  (req,res,next)=>{
 ############################################################ */
 .put('/',function(req,res,next){
     var imageList = JSON.parse(req.body.data);
-    (function repeat(i){
-        if(i >= imageList.length){
+        (function repeat(i){
+            if(i >= imageList.length){
             res.json({images: i});
             return;
         }

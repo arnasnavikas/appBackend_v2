@@ -34,8 +34,8 @@ router.post('/:folder/:sub/:id', upload.any(),  (req,res,next)=>{
                 });
                 /*********************** ADD PICTURE TO DATABASE ***************** */
             },function(result, call){
-                var img_obj ={  img_name: result,
-                                img_src: custom_paths.images_location+folder+'/'+subFolder+'/'+result,
+                var img_obj ={  name: result,
+                                imgURL: custom_paths.images_location+folder+'/'+subFolder+'/'+result,
                                 size: files[0].size
                              };
                 GalleryModel.update({_id:folder_id},{$push:{gallery_images:img_obj}},function(err,data){

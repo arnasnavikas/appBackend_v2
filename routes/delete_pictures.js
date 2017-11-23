@@ -31,7 +31,7 @@ router.put('/:group/:folder/:groupId', function(req,res,next){
             }
             // removes picture from fyle sysytem by given picture name;
             ,function(image,call){
-              fs.remove(custom_paths.public_folder+groupName+'/'+folderName+'/'+image.img_name, function(err){
+              fs.remove(custom_paths.public_folder+groupName+'/'+folderName+'/'+image.name, function(err){
                 if(err){ call(err); return; }
                 call(null,image._id);
               });
