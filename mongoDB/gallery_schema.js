@@ -11,7 +11,7 @@ var schema = new Schema({ group_id : String,
                                             imgURL:      {type: String, default: 'no data'},
                                             description: {type: String, default: ''},
                                             size:        {type: Number, default: 0        },
-                                            sukurta:     {type: Number, default: Date.now() }
+                                            created:     {type: Number, default: Date.now() }
                           }],
                           birth_time: {type: Number, default: Date.now()},
                           aprasymas: {type: String, default: 'No descrition'},

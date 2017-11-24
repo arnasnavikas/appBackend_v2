@@ -10,7 +10,7 @@ var customPaths = require('./paths');
 
 /**#############################################
  * sukuria nauja grupe
- */
+ *##############################################*/
 router.post('/create',function(req,res,next){
   var data = JSON.parse(req.body.data);
     async.parallel([
@@ -19,7 +19,7 @@ router.post('/create',function(req,res,next){
             fs.mkdir(route,function(err,data){
                 if(err){ call(err); return;}
                 console.log(Date.now())
-                call(null, data);
+                call(null, data);   
             });
         },
         function(call){
@@ -128,7 +128,7 @@ router.post('/create',function(req,res,next){
                     res.json(data);
                 });
 /*##############################################################
- Deletes groups that specified in data:[] array
+ Deletes multiple groups that specified in data:[] array
  ###############################################################*/
 }).put('/delete',function(req,res,next){
         let group_ids = JSON.parse(req.body.data);

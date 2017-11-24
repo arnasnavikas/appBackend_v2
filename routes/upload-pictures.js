@@ -70,10 +70,12 @@ router.post('/', upload.any(),  (req,res,next)=>{
             function(call){
                 imagesModel.findOne({_id:imageList[i]},function(err,data){
                     if(err){call(err);return;}
-                    imagesModel.remove({_id:imageList[i]},function(_err,_data){
-                        if(_err){call(_err);return;}
-                        call(null,data.name);
-                    });
+                    if(data){
+                        imagesModel.remove({_id:imageList[i]},function(_err,_data){
+                            if(_err){call(_err);return;}
+                            call(null,data.name);
+                        });
+                    }
                 });
             },function(name,call){
                 fs.remove(custom_paths.private_images_folder+name,function(err,data){
