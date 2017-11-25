@@ -102,8 +102,9 @@ router.post('/create',function(req,res,next){
   * atnaujina grupes aprasyma
   ###############################################*/
     var body = JSON.parse(req.body.data);
-    groupModel.update({_id:body._id},
-        {aprasymas: body.description},function(err,data){
+    
+    groupModel.update({_id:body.id},
+        {description: body.description},function(err,data){
             if(err){res.json(err);return;}
             res.json(data);
         });
@@ -112,7 +113,7 @@ router.post('/create',function(req,res,next){
  * atnaujina grupes pavadinima
  ###############################################*/
     var body = JSON.parse(req.body.data); // {pavadinimas:'',route:'',imgURL:'',aprasymas:''}
-    groupModel.update({_id:body._id},{pavadinimas: body.pavadinimas,route:body.route},
+    groupModel.update({_id:body.id},{name: body.name,route:body.route},
         function(err,data){
             if(err){res.json(err);return;}
             res.json(data);
