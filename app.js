@@ -9,7 +9,7 @@ var connectDB = require('./mongoDB/db');
 var delete_pictures = require('./routes/delete_pictures');
 var admin_messages = require('./routes/admin_messages');
 var client_messages = require('./routes/client_messages');
-var skaiciuokle = require('./routes/skaiciuokle');
+var table = require('./routes/table');
 // var gallery_create_new = require('./routes/gallery_create_new');
 var gallery_add_pictures = require('./routes/gallery_add_pictures');
 var gallery_add_index = require('./routes/gallery_add_index');
@@ -66,7 +66,7 @@ app.use('/message', client_messages);
 // app.use('/new_gallery', gallery_create_new);
 // app.use('/pictures-by-gallery',get_pictures_by_gallery);
 app.use('/sendMail', send_mail);
-app.use('/skaiciuokle', skaiciuokle);
+app.use('/table', table);
 app.use('/upload-pictures',upload_pictures);
 
 // catch 404 and forward to error handler

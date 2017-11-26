@@ -4,6 +4,7 @@ var fs = require('fs-extra');
 var async = require('async');
 var custom_paths = require('./paths');
 var GalleryModel = require('../mongoDB/gallery_schema');
+var groupModel = require('../mongoDB/group-model')
 var stream          = require ('stream');
 var multer          = require ('multer');
 var upload = multer({
@@ -50,7 +51,7 @@ var upload = multer({
          */
         var body = JSON.parse(req.body.data);
             async.parallel([
-              /*********************** CREATE NEW FOLDER *********************** */
+              /*********************** CREATE NEW FOLDER IN FYLE SYSTEM *********************** */
                 function(call){
                     fs.mkdir(custom_paths.public_folder+'/'+body.group_folder+'/'+body.folder_name, function(err) {
                                         if (err){
@@ -70,6 +71,12 @@ var upload = multer({
                     if(err){ call(err); return; }
                     call(null, data);
                 });
+            },function(call){
+                /*********************** UPDATES GALLERY NUMBER IN GROUP MODEL ******************** */
+                groupModel.findOneAndUpdate({_id:body.group_id},{$inc:{"gallerys":1}},function(err,data){
+                    if(err){ call(err); return; }
+                    call(null,data);
+                });
             }],function(err,call){
                 if(err){res.json(err); return;}
                 res.json(call);    
@@ -88,29 +95,41 @@ var upload = multer({
            } 
            console.log('times repeat - ' + i)
            async.waterfall([
-             // finds gallerys - route name, and _id, by given _id;
              function(call){
-               GalleryModel.findOne({_id:body[i]},{ folder_name:1,group_folder:1 },
-                                                function(err,data){
+        /************************** FINDS GALLERY *************************** */
+               GalleryModel.findOne({_id:body[i]}, function(err,gallery){
                                                   if(err){call(err);return;}
-                                                  console.log('data from database.')
-                                                  console.log(data)
-                                                  call(null,data);
+                                                  call(null,gallery);
                                                  });
-                                                 // removes folder from fyle sysytem by given route;
-               },function(data,call){
-                 console.log('data from callback .')
-                 console.log(data)
-               fs.remove(custom_paths.public_folder+'/'+data.group_folder+'/'+data.folder_name, function(err){
+        /************************** REMOVE GALLERY FROM FYLE SYSTEM ********* */
+               },function(gallery,call){
+                var gallery_folder = custom_paths.public_folder+'/'+gallery.group_folder+'/'+gallery.folder_name;
+                fs.stat(gallery_folder, (err,stat) => {
+                    if(stat){
+                        fs.remove(gallery_folder, function(err){
+                          if(err){ call(err); return; }
+                          log_file.push('Folder deleted successfuly.')
+                          call(null,gallery);
+                        });
+                    }else{
+                        res.status(500).send('no path with name - '+pic_path);
+                        return;
+                    }
+                  });
+        /************************** REMOVE GALLERY FROM DATA BASE ********* */
+             },function(gallery,call){
+               GalleryModel.remove({_id:body[i] },function(err){
                  if(err){ call(err); return; }
-                 call(null,data._id);
+                 log_file.push('Gallery removed from database.');
+                 call(null,gallery);
                });
-             // removes gallery from database by given _id;
-             },function(id,call){
-               GalleryModel.remove({_id:id },function(err){
-                 if(err){ call(err); return; }
-                 call(null,null);
-               });
+             },function(gallery,call){
+        /************************** UPDATES GROUP MOGEL "GALLERYS" NUMBER ********* */
+                groupModel.findOneAndUpdate({_id:gallery.group_id},{$inc:{gallerys:-1}},function(err,data){
+                    if(err){ call(err); return; }
+                    log_file.push('Group model "Gallerys" fields updated successfuly.');
+                    call(null,data);
+                });
              }
            ],function(err,call){
              if(err){ res.json(err); return }

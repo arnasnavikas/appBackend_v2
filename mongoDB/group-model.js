@@ -8,7 +8,8 @@ var schema = new Schema({ newMessages : { type: Number, default: 0},
                           imgURL      : { type: String, default: '' },
                           route       : { type: String },
                           description : { type: String, default:''},
-                          folder_name : { type : String, default: ''}
+                          folder_name : { type : String, default: ''},
+                          table_name  : { type : String, default:undefined}
              });
 
 var CategoryModel = mongoose.model('category_list', schema);

@@ -37,8 +37,8 @@ ADD IMAGES TO GALLERY (working)
                     var pic_name = Date.now()+'.JPG';
                     var bufferStream = new stream.PassThrough();
                     bufferStream.end(new Buffer(files[0].buffer));
-                    fs.exists(pic_path, (exists) => {
-                        if(exists){
+                    fs.stat(pic_path, (err,stat) => {
+                        if(stat){
                             var writeFile = fs.createWriteStream(pic_path+pic_name);
                             var pipe = bufferStream.pipe(writeFile);
                             writeFile.on('close', function () { 
