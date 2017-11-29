@@ -39,37 +39,7 @@ get('/get-all',function(req,res,next){
             if(err){ res.json(err); return;}
             res.json(data);
         });
-/*#####################################################################
-* Creates new table 
-*#####################################################################*/
-}).
-post('/create',function(req, res,next){
-    var body = JSON.parse(req.body.data);
-    var table = new TableModel(body);
-    var tableRow = new TableRowModel({group_id:body.group_id});
-    async.parallel([
-///*************************  CREATE TABLE **************************** */
-      function(call){
-        table.save(function(err,data){
-            if(err){call(err);return;}
-            call(null,data);
-        });
-    },function(call){
-///*************************  CREATE ROW IN TABLE **************************** */
-        tableRow.save(function(err,data){
-            if(err){call(err);return;}
-            call(null,data);
-        })
-    },function(call){
-///*************************  ADD TABLE NAME IN GROUP MODEL **************************** */
-        groupModel.update({_id:body.group_id},{table_name:body.name},function(err,data){
-            if(err){call(err);return;}
-            call(null,data);
-        })
-    }],function(err,call){
-        if(err){res.json(err);return;}
-        res.json({MESSAGE:'THIS FROM NEW TABLE',DATA:body});
-    })
+
 }).post('/add-row/:group_id',function(req,res,next){
 /*#####################################################################
  * add row to table 
@@ -95,22 +65,24 @@ post('/create',function(req, res,next){
         TableRowModel.update({_id:x._id},{
             group_id: x.group_id,           
             name:     x.name,
+            search_name: x.name,
             price:    x.price,    
             type:     x.type,   
             iframeURL:  x.iframeURL,         
             iseiga:     x.iseiga,
+            iseiga_type: x.iseiga_type,
             material_price: x.material_price
         },function(err,data){
             if(err){res.json(err);return}
                 iterator(i+1)
         })
     })(0);
-}).put('/remove-row/:id',function(req,res,next){
+}).put('/remove-row',function(req,res,next){
  /*#####################################################################
  * Updates existing table 
  #####################################################################*/
-    var row_id= req.params.id;
-    TableRowModel.remove({_id:row_id},
+    var row_ids=  JSON.parse(req.body.data);
+    TableRowModel.remove({_id:{$in:row_ids}},
                         function (err){
                             if(err){res.json(err);return;} 
                             res.json('deleted');

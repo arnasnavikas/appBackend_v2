@@ -7,27 +7,47 @@ var messageModel = require('../mongoDB/mail_schema');
 var galleryModel = require('../mongoDB/gallery_schema');
 var tableModel = require('../mongoDB/table-schema')
 var customPaths = require('./paths');
+var TableModel = require ('../mongoDB/table-schema');
+var TableRowModel = require('../mongoDB/table-row-schema');
+var PictureModel = require('../mongoDB/picture-schema');
 
 /**#############################################
  * sukuria nauja grupe
  *##############################################*/
 router.post('/create',function(req,res,next){
-  var data = JSON.parse(req.body.data);
-    async.parallel([
+  var group_data = JSON.parse(req.body.data);
+    async.waterfall([
         function(call){
-            let route = customPaths.public_folder+'/'+data.folder_name
+///*************************  CREATE GROUP FOLDER IN FYLE SYSTEM **************************** */
+            let route = customPaths.public_folder+'/'+group_data.folder_name
             fs.mkdir(route,function(err,data){
                 if(err){ call(err); return;}
                 console.log(Date.now())
-                call(null, data);   
+                call(null, group_data);   
             });
         },
-        function(call){
+///*************************  CREATE GROUP COLLECTION IN DATA BASE **************************** */
+        function(data,call){
             var newGroup = new groupModel(data);
-            newGroup.save(function(err,data){
+            newGroup.save(function(err,group){
                 if(err){ call(err); return;}
-                call(null,data);
+                call(null,group);
             });
+        },function(group,call){
+///*************************  CREATE TABLE COLLECTION IN DATA BASE **************************** */
+            console.log(group)
+            var table = new TableModel({group_id:group._id,name:group.name});
+            table.save(function(err,data){
+                if(err){call(err);return;}
+                call(null,group);
+            });
+        },function(group,call){
+///*************************  CREATE FIRST ROR IN TABLE COLLECTION  **************************** */
+            var tableRow = new TableRowModel({group_id:group._id});
+            tableRow.save(function(err,data){
+                if(err){call(err);return;}
+                call(null,group);
+            })
         }
     ],function(err,data){
         if(err){ res.json(err);return;}
@@ -65,12 +85,22 @@ router.post('/create',function(req,res,next){
 /**#############################################
  * atnaujina grupes pavadinima
  ###############################################*/
-    var body = JSON.parse(req.body.data); // {pavadinimas:'',route:'',imgURL:'',aprasymas:''}
-    groupModel.update({_id:body.id},{name: body.name,route:body.route},
-        function(err,data){
-            if(err){res.json(err);return;}
-            res.json(data);
-        });
+    var body = JSON.parse(req.body.data); // {name:'',route:'',id :''}
+    async.parallel([
+        function(call){
+            groupModel.update({_id:body.id},{name: body.name,route:body.route},function(err,data){
+                if(err){call(err);return;}
+                call(null,data);
+            });
+        },function(call){
+            tableModel.update({group_id:body.id},{name:body.name},function(err,data){
+                if(err){call(err);return;}
+                call(null,data);
+            })
+        }],function(err,call){
+            if(err){res.json(err);return;}    
+            res.json(call);
+    });
 /**#############################################
  * priskiria grupes paveiksliuka 
  ###############################################*/
@@ -88,6 +118,7 @@ router.post('/create',function(req,res,next){
         let group_ids = JSON.parse(req.body.data);
         var successLog = [];
         var errorLog = [];
+        
         (function iterator(i){
             if(i >= group_ids.length){
               res.json({message: 'delete comlete',ok:successLog,error:errorLog});
@@ -100,51 +131,65 @@ router.post('/create',function(req,res,next){
              *  5) deletes tables from database, witch belongs to group
              */
             async.waterfall([
-                function(clb){
+                function(call){
+///*************************  FIND GROUP **************************** */
                     groupModel.findOne({_id:group_ids[i]},function(err,data){
-                        if(err){errorLog.push({groupFind:err}); clb(err);return;}
+                        if(err){errorLog.push({groupFind:err}); call(err);return;}
                         successLog.push(data)
-                        clb(null,data)
-                    })
-                },function(data,clb){
-                    async.parallel([
-                        function(call){
-                            var folderPath = customPaths.public_folder+'/'+data.folder_name;
-                            fs.stat(folderPath, (err,stat) => {
-                                if(stat){
-                                    fs.remove(folderPath,function(err){
-                                        if(err){errorLog.push(err);call(err);return;}
-                                        call(null,{fileSystem:true,path:folderPath});
-                                    });
-                                }else{
-                                    res.status(500).send('no path with name - '+pic_path);
-                                    return;
-                                }
-                              });
-                        },function(call){
-                           groupModel.remove({_id:group_ids[i]},function(err,data){
-                               if(err){errorLog.push({groupModel:err});call(err); return;}
-                               call(null,data);
-                           });
-                        },function(call){
-                            /** deletes all gallerys from database that beolong to group */
-                            galleryModel.remove({group_id:{$in:group_ids[i]}},function(err,data){
-                                if(err){errorLog.push({galleryModel:err});call(err);return;}
-                                call(null,data);
-                            });
-                            /** deletes all tables from database that beolong to group */
-                        },function(call){
-                            tableModel.remove({group_id:{$in:group_ids[i]}},function(err,data){
-                                if(err){errorLog.push({tableModel:err});call(err);return;}
-                                call(null,data);
-                            });
-                        }   
-                    ],function(err,call){
-                        if(err){res.json({async:err,function:errorLog});return;}
-                        successLog.push(call)
-                        clb(null,null)
+                        call(null,data)
                     });
+                },function(data,call){
+///*************************  DELETE FOLDER FROM FYLE SYSTEM **************************** */
+                    var folderPath = customPaths.public_folder+'/'+data.folder_name;
+                    console.log(folderPath)
+                    fs.stat(folderPath, (err,stat) => {
+                        console.log(err)
+                        console.log(stat)
+                        if(stat){
+                            fs.remove(folderPath,function(err){
+                                if(err){errorLog.push(err);call(err);return;}
+                                call(null,data);
+                            });
+                        }else{
+                            res.status(500).send('no path with name - '+folderPath);
+                            return;
+                        }
+                      });
                 }
+                ,function(data,call){
+///*************************  DELETE GROUP DATA FROM DATABASE **************************** */
+                   groupModel.remove({_id:group_ids[i]},function(err,data){
+                       if(err){errorLog.push({groupModel:err});call(err); return;}
+                       call(null,data);
+                   });
+                },
+                function(data,call){
+///*************************  DELETE GALLERYS DATA FROM DATABASE **************************** */
+                    galleryModel.remove({group_id:{$in:group_ids[i]}},function(err,data){
+                        if(err){errorLog.push({galleryModel:err});call(err);return;}
+                        call(null,data);
+                    });
+                    /** deletes all tables from database that beolong to group */
+                },
+                function(data,call){
+///*************************  DELETE TABLE DATA FROM DATABASE **************************** */
+                    tableModel.remove({group_id:group_ids[i]},function(err,data){
+                        if(err){errorLog.push({tableModel:err});call(err);return;}
+                        call(null,data);
+                    });
+                },function(data,call){
+///*************************  DELETE TABLE ROWS DATA FROM DATABASE **************************** */
+                    TableRowModel.remove({group_id:{$in:group_ids[i]}},function(err,data){
+                        if(err){errorLog.push({tableModel:err});call(err);return;}
+                        call(null,data);
+                    });
+                },function(data,call){
+///*************************  DELETE PICTURES DATA FROM DATABASE **************************** */
+                    PictureModel.remove({group_id:{$in:group_ids[i]}},function(err,data){
+                        if(err){errorLog.push({tableModel:err});call(err);return;}
+                        call(null,data);
+                    });
+                }   
             ],function(err,clb){
                 if(err){res.json(err);return;}
                 iterator(i+1)

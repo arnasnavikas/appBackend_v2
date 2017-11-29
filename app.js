@@ -6,27 +6,29 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var connectDB = require('./mongoDB/db');
 // routes
-var delete_pictures = require('./routes/delete_pictures');
+// var delete_pictures = require('./routes/delete_pictures');
 var admin_messages = require('./routes/admin_messages');
 var client_messages = require('./routes/client_messages');
-var table = require('./routes/table');
 // var gallery_create_new = require('./routes/gallery_create_new');
-var gallery_add_pictures = require('./routes/gallery_add_pictures');
-var gallery_add_index = require('./routes/gallery_add_index');
+// // var gallery_add_pictures = require('./routes/gallery_add_pictures');
+// var gallery_add_index = require('./routes/gallery_add_index');
 // var gallery_delete = require('./routes/gallery_delete');
 var send_mail = require('./routes/send_mail');
 // var get_gallerys = require('./routes/gallery_get')
-var get_pictures = require('./routes/pictures_get');
+// var get_pictures = require('./routes/pictures_get');
 // var group_delete = require('./routes/group_delete');
 // var group_rename = require('./routes/group_rename');
-var upload_pictures = require('./routes/upload-pictures');
 var my_resume = require('./routes/my-resume');
 // var get_pictures_by_gallery = require('./routes/get-pictures-by-gallery-name');
 
 /****************new route files************** */
 var group = require('./routes/group');
-var gallery = require('./routes/gallery')
-var picture = require('./routes/pictures')
+var gallery = require('./routes/gallery');
+var picture = require('./routes/pictures');
+var table = require('./routes/table');
+var upload_pictures = require('./routes/upload-pictures');
+var status = require('./routes/my-status');
+
 //application
 var app = express();
 /**connecting mongo database */
@@ -50,24 +52,24 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/group',group);
 app.use('/gallery',gallery);
 app.use('/picture',picture);
-
+app.use('/upload-pictures',upload_pictures);
+app.use('/table', table);
+app.use('/status',status)
 //old routes for delete later
-app.use('/addPictures', gallery_add_pictures);
-app.use('/addindex', gallery_add_index);
+// app.use('/addPictures', gallery_add_pictures);
+// app.use('/addindex', gallery_add_index);
 app.use('/create-resume',my_resume);
 // app.use('/galleryDelete', gallery_delete);
 // app.use('/get-gallerys',get_gallerys);
-app.use('/get-pictures',get_pictures);
+// app.use('/get-pictures',get_pictures);
 // app.use('/group-delete/',group_delete);
 // app.use('/group-rename',group_rename);
-app.use('/galerija', delete_pictures);
+// app.use('/galerija', delete_pictures);
 app.use('/messages', admin_messages );
 app.use('/message', client_messages);
 // app.use('/new_gallery', gallery_create_new);
 // app.use('/pictures-by-gallery',get_pictures_by_gallery);
 app.use('/sendMail', send_mail);
-app.use('/table', table);
-app.use('/upload-pictures',upload_pictures);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

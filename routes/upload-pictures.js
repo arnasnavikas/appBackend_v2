@@ -23,11 +23,28 @@ router.post('/', upload.any(),  (req,res,next)=>{
                 var pic_name = Date.now()+'.JPG';
                 var bufferStream = new stream.PassThrough();
                 bufferStream.end(new Buffer(files[0].buffer));
-                var writeFile = fs.createWriteStream(pic_path+pic_name);
-                var pipe = bufferStream.pipe(writeFile);
-                writeFile.on('close', function () { 
-                    call(null, pic_name);
-                });
+                fs.stat(pic_path, (err,stat) => {
+                    console.log(err)
+                    console.log(stat)
+                    if(err){
+                        fs.mkdir(pic_path,function(err,data){
+                            if(err){ call(err); return;}
+                            var writeFile = fs.createWriteStream(pic_path+pic_name);
+                            var pipe = bufferStream.pipe(writeFile);
+                            writeFile.on('close', function () { 
+                                call(null, pic_name);
+                            });   
+                        });
+                    }else{
+                        var writeFile = fs.createWriteStream(pic_path+pic_name);
+                        var pipe = bufferStream.pipe(writeFile);
+                        writeFile.on('close', function () { 
+                            call(null, pic_name);
+                        });
+                    }
+                  });
+                
+                
                 /*********************** ADD PICTURE TO DATABASE ***************** */
             },function(name, call){
                 var img_obj ={  name: name,
