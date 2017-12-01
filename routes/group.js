@@ -102,18 +102,32 @@ router.post('/create',function(req,res,next){
             res.json(call);
     });
 /**#############################################
- * priskiria grupes paveiksliuka 
+ * priskiria grupes paveiksliukus
  ###############################################*/
-}).post('/add-cover',function(req,res,next){
+}).post('/add-cover/:group_id',function(req,res,next){
         var body = JSON.parse(req.body.data);
-            groupModel.update({_id:body._id},
-                {imgURL: body.imgURL},function(err,data){
+            groupModel.update({_id:req.params.group_id},
+                { $push: { imgURL: { $each: body } } },function(err,data){
                     if(err){res.json(err);return;}
                     res.json(data);
                 });
 /*##############################################################
- Deletes multiple groups that specified in data:[] array
+ Deletes group imgURL images 
  ###############################################################*/
+}).put('/remove-cover/:group_id',function(req,res,next){
+    var body = JSON.parse(req.body.data);
+    var image_id = []
+    for(var image of body)
+        image_id.push(image._id)
+        groupModel.update({_id:req.params.group_id},
+            { $pull: { imgURL: { _id: { $in: image_id } } } }
+            ,function(err,data){
+                if(err){res.json(err);return;}
+                res.json(data);
+            });
+/*##############################################################
+Deletes multiple groups that specified in data:[] array
+###############################################################*/
 }).put('/delete',function(req,res,next){
         let group_ids = JSON.parse(req.body.data);
         var successLog = [];

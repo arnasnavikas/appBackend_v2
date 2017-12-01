@@ -18,7 +18,7 @@ var send_mail = require('./routes/send_mail');
 // var get_pictures = require('./routes/pictures_get');
 // var group_delete = require('./routes/group_delete');
 // var group_rename = require('./routes/group_rename');
-var my_resume = require('./routes/my-resume');
+// var my_resume = require('./routes/my-resume');
 // var get_pictures_by_gallery = require('./routes/get-pictures-by-gallery-name');
 
 /****************new route files************** */
@@ -27,8 +27,7 @@ var gallery = require('./routes/gallery');
 var picture = require('./routes/pictures');
 var table = require('./routes/table');
 var upload_pictures = require('./routes/upload-pictures');
-var status = require('./routes/my-status');
-
+var team_member = require('./routes/my-team')
 //application
 var app = express();
 /**connecting mongo database */
@@ -54,11 +53,11 @@ app.use('/gallery',gallery);
 app.use('/picture',picture);
 app.use('/upload-pictures',upload_pictures);
 app.use('/table', table);
-app.use('/status',status)
+app.use('/my-team',team_member);
 //old routes for delete later
 // app.use('/addPictures', gallery_add_pictures);
 // app.use('/addindex', gallery_add_index);
-app.use('/create-resume',my_resume);
+// app.use('/create-resume',my_resume);
 // app.use('/galleryDelete', gallery_delete);
 // app.use('/get-gallerys',get_gallerys);
 // app.use('/get-pictures',get_pictures);

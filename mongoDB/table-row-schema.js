@@ -12,6 +12,7 @@ var schema = new Schema({ group_id:             String,
                           iseiga_type:          {type: String, default: 'null'},
                           hidden:               {type: Boolean, default: true},
                           material_price:       {type: Number, default: 0},
+                          material_name:       {type: String, default: ''},
                           job_total_price:      {type: Number, default: 0}, 
                           material_total_price: {type: Number, default: 0},
                           total_price:          {type: Number, default:  0.00}

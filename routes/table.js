@@ -71,7 +71,8 @@ get('/get-all',function(req,res,next){
             iframeURL:  x.iframeURL,         
             iseiga:     x.iseiga,
             iseiga_type: x.iseiga_type,
-            material_price: x.material_price
+            material_price: x.material_price,
+            material_name: x.material_name,
         },function(err,data){
             if(err){res.json(err);return}
                 iterator(i+1)
