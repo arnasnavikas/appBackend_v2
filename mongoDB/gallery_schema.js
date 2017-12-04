@@ -3,6 +3,8 @@ var Schema = mongoose.Schema;
 
 var schema = new Schema({ group_id : String,
                           group_folder: String,
+                          user_folder: String,
+                          user_id: String,
                           name: String,
                           route: String,
                           folder_name: String,

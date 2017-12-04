@@ -1,52 +1,26 @@
 var express = require ('express');
 var router  = express.Router();
-var TableModel = require ('../mongoDB/table-schema');
 var TableRowModel = require('../mongoDB/table-row-schema');
 var async = require ('async');
-var groupModel = require('../mongoDB/group-model')
 
 /*#####################################################################
  * Finds table from database by group ID, and sends to client 
 #####################################################################*/
 router.get('/get-one/:id', function(req, res, next) {
     var group_id = req.params.id;
-    var data = new Object;
-    async.parallel([
-        function(call){
-///*************************  FINDS TABLE THAT BELONGS group_id ****** */
-            TableModel.findOne({group_id: group_id },function(err,table){
-                if(err){ call(err); return;}
-                data['table'] = table;
-                call(null,null);
-            });
-        },function(call){
 ///*************************  FINDS ALL ROWS THAT BELONGS TO group_id ****** */
             TableRowModel.find({group_id: group_id},function(err,rows){
-                if(err){ call(err); return;}
-                data['tableRows'] = rows
-                call(null,null);
+                if(err){ res.json(err); return;}
+                res.json(rows);
             });  
-        }],function(err,call){
-            if(err){ res.json(err); return;}
-            res.json(data);
-    });
-}).
-/*#####################################################################
-* Finds all tables
-*#####################################################################*/
-get('/get-all',function(req,res,next){
-        TableModel.find(function(err,data){
-            if(err){ res.json(err); return;}
-            res.json(data);
-        });
-
-}).post('/add-row/:group_id',function(req,res,next){
+}).post('/add-row/:user_id/:group_id',function(req,res,next){
 /*#####################################################################
  * add row to table 
  #####################################################################*/
  var group_id = req.params.group_id;
- var tableRow = new TableRowModel({group_id:group_id});
- tableRow.save(function(err,data){
+ var user_id = req.params.user_id;
+ new TableRowModel({group_id:group_id,
+                    user_id: user_id}).save(function(err,data){
      if(err){call(err);return;}
      res.json(data);
     });
@@ -88,14 +62,6 @@ get('/get-all',function(req,res,next){
                             if(err){res.json(err);return;} 
                             res.json('deleted');
                         });
-/*#####################################################################
-* Deletes existing table 
-#####################################################################*/
-}).put('/delete', function(req,res,next){
-    var tablesID = JSON.parse(req.body.data);
-    TableModel.remove({_id:{$in:tablesID}},function(err,data){
-        if(err){res.json(err);return;}
-        res.json(data);
-    });
-});
+
+})
 module.exports = router;

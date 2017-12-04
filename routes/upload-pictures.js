@@ -5,7 +5,8 @@ var stream          = require ('stream');
 var router          = express.Router();
 var custom_paths    = require ('./paths');
 var async           = require ('async');
-var imagesModel     = require ('../mongoDB/images-model');
+var PictureModel = require('../mongoDB/picture-schema');
+
 var upload = multer({
     inMemory: true
 });
@@ -13,19 +14,19 @@ var upload = multer({
 /*##########################################################
 saving images to folder
 ############################################################ */
-router.post('/', upload.any(),  (req,res,next)=>{
+router.post('/:user_folder/:user_id', upload.any(),  (req,res,next)=>{
     var files = req.files;
+    var user_folder =  req.params.user_folder;
+    var user_id = req.params.user_id;
     if(files){
         async.waterfall([
                 /*********************** WRITES PICTURE FILE DO HARD DISK ***************** */
             function(call){
-                var pic_path = custom_paths.private_images_folder;
+                var pic_path = custom_paths.public_folder+'/'+user_folder+'/private_pictures/';
                 var pic_name = Date.now()+'.JPG';
                 var bufferStream = new stream.PassThrough();
                 bufferStream.end(new Buffer(files[0].buffer));
                 fs.stat(pic_path, (err,stat) => {
-                    console.log(err)
-                    console.log(stat)
                     if(err){
                         fs.mkdir(pic_path,function(err,data){
                             if(err){ call(err); return;}
@@ -43,16 +44,16 @@ router.post('/', upload.any(),  (req,res,next)=>{
                         });
                     }
                   });
-                
-                
                 /*********************** ADD PICTURE TO DATABASE ***************** */
             },function(name, call){
                 var img_obj ={  name: name,
-                                imgURL: custom_paths.private_images_location+name,
-                                size: files[0].size
+                                user_id : user_id,
+                                user_folder: user_folder,
+                                imgURL: custom_paths.images_location+user_folder+'/private_pictures/'+name,
+                                size: files[0].size,
+                                private: true
                              };
-                var newPicture = new imagesModel(img_obj);
-                newPicture.save(function(err,data){
+               new PictureModel(img_obj).save(function(err,data){
                     if(err){call(err);return;}
                     call(null,data);
                 });
@@ -67,8 +68,9 @@ router.post('/', upload.any(),  (req,res,next)=>{
 /*##########################################################
  finds all pictures
 ############################################################ */
-.get('/',function(req,res,next){
-    imagesModel.find(function(err,data){
+.get('/:user_id',function(req,res,next){
+    var user = req.params.user_id;
+    PictureModel.find({user_id:user,private:true},function(err,data){
         if(err){res.json(err);return;}
         res.json(data);
     });
@@ -78,27 +80,34 @@ router.post('/', upload.any(),  (req,res,next)=>{
 ############################################################ */
 .put('/',function(req,res,next){
     var imageList = JSON.parse(req.body.data);
-        (function repeat(i){
-            if(i >= imageList.length){
-            res.json({images: i});
+    var log_file = [];
+    (function repeat(i){
+        if(i >= imageList.length){
+            res.json({response:log_file});
             return;
         }
         async.waterfall([
             function(call){
-                imagesModel.findOne({_id:imageList[i]},function(err,data){
+                PictureModel.findOneAndRemove({_id:imageList[i]},function(err,data){
                     if(err){call(err);return;}
-                    if(data){
-                        imagesModel.remove({_id:imageList[i]},function(_err,_data){
-                            if(_err){call(_err);return;}
-                            call(null,data.name);
+                    log_file.push(data);
+                    call(null,data)
+                });
+            },function(picture,call){
+                var pic_path = custom_paths.public_folder+'/'+picture.user_folder+'/private_pictures/'+picture.name;
+                fs.stat(pic_path, (err,stat) => {
+                    if(stat){
+                         fs.remove(pic_path,function(err,data){
+                            if(err){call(err);return;}
+                            log_file.push(data)
+                            call(null,data);
                         });
+                    }else{
+                        res.status(500).send('no path with name - '+pic_path);
+                        return;
                     }
-                });
-            },function(name,call){
-                fs.remove(custom_paths.private_images_folder+name,function(err,data){
-                    if(err){call(err);return;}
-                    call(null,null);
-                });
+                  });
+               
             }
         ],function(err,call){
             if(err){res.json(err);return;}

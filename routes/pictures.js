@@ -21,19 +21,21 @@ var gallery_id = req.params.gallery_id;
         if(err){ res.json(err);return;}
         res.json(data)
     });
-}).post('/upload/:folder/:sub/:id', upload.any(),  (req,res,next)=>{
+}).post('/upload/:user_folder/:group_folder/:gallery_folder/:user_id/:gallery_id', upload.any(),  (req,res,next)=>{
 /*##########################################################
 ADD IMAGES TO GALLERY (working)
 ############################################################ */
         var files = req.files;
         if(files){
-            var group_folder = req.params.folder;
-            var gallery_folder = req.params.sub;
-            var gallery_id = req.params.id;
+            var user_folder = req.params.user_folder;
+            var group_folder = req.params.group_folder;
+            var gallery_folder = req.params.gallery_folder;
+            var user_id = req.params.user_id;
+            var gallery_id = req.params.gallery_id;
             async.waterfall([
                     /*********************** WRITES PICTURE FILE DO HARD DISK ***************** */
                 function(call){
-                    var pic_path = custom_paths.public_folder+'/'+group_folder+'/'+gallery_folder+'/';
+                    var pic_path = custom_paths.public_folder+'/'+user_folder+'/'+group_folder+'/'+gallery_folder+'/';
                     var pic_name = Date.now()+'.JPG';
                     var bufferStream = new stream.PassThrough();
                     bufferStream.end(new Buffer(files[0].buffer));
@@ -55,13 +57,16 @@ ADD IMAGES TO GALLERY (working)
                     GalleryModel.findOne({_id:gallery_id},function(err,data){
                         if(err){ call(err);return; }
                         image ={  name: image_name,
-                                  imgURL: custom_paths.images_location+group_folder+'/'+gallery_folder+'/'+image_name,
+                                  imgURL: custom_paths.images_location+user_folder+'/'+group_folder+'/'+gallery_folder+'/'+image_name,
                                   size: files[0].size,
+                                  user_id: user_id,  
                                   group_id: data.group_id,  
                                   gallery_id: data._id,
+                                  private: false,
+                                  user_folder : user_folder,
+                                  group_folder : data.group_folder,
                                   folder_name: gallery_folder,
-                                  gallery_name : data.name,
-                                  group_folder : data.group_folder
+                                  gallery_name : data.name
                             };
                         var newPicture = new PictureModel(image);
                         newPicture.save(function(err,picture){
@@ -106,7 +111,7 @@ ADD IMAGES TO GALLERY (working)
             }
      /*********************** REMOVE FROM FYLE SYSTEM  ***************** */
             ,function(image,call){
-                    var image_path = custom_paths.public_folder+'/'+image.group_folder+'/'+image.folder_name+'/'+image.name;
+                    var image_path = custom_paths.public_folder+'/'+image.user_folder+'/'+image.group_folder+'/'+image.folder_name+'/'+image.name;
                     fs.stat(image_path, (err,stat) => {
                         if(stat){
                             fs.remove(image_path, function(err){
@@ -120,15 +125,9 @@ ADD IMAGES TO GALLERY (working)
                 });
      /*********************** UPDATE GALLERY IMAGES NUMBER  ***************** */
     },function(image,call){
-        console.log('group_id - '+image.group_id)
-        GalleryModel.findOne({_id:image.gallery_id},function(err,gallery){
+        GalleryModel.findOneAndUpdate({_id:image.gallery_id},{$inc:{"gallery_images":-1}},function(err,data){
             if(err){ call(err); return; }
-            var picture_in_gallery = gallery.gallery_images - 1;
-            GalleryModel.update({_id:image.gallery_id},{gallery_images:picture_in_gallery},
-                function(err,data){
-                    if(err){ call(err); return; }
-                    call(null,data);
-                });
+             call(null,data);
             });
         },function(data,call){
      /*********************** DELETE IMAGE FROM DATABASE  ***************** */

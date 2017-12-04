@@ -3,6 +3,8 @@ var Schema = mongoose.Schema;
 
 var schema = new Schema({ newMessages : { type: Number, default: 0},
                           gallerys    : { type: Number, default: 0},
+                          user_id    : { type: String},
+                          user_folder : { type: String},
                           tables      : { type: Number, default: 0},
                           name        : { type: String, required:true },
                           imgURL      : { type: Array ,default:[] },

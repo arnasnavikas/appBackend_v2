@@ -4,6 +4,7 @@ var fs = require('fs-extra');
 var async = require('async');
 var custom_paths = require('./paths');
 var GalleryModel = require('../mongoDB/gallery_schema');
+var PictureModel = require('../mongoDB/picture-schema');
 var groupModel = require('../mongoDB/group-model')
 var stream          = require ('stream');
 var multer          = require ('multer');
@@ -46,14 +47,15 @@ var upload = multer({
          *    route   : 'nasm_sad_',
          *    group_folder   : 'asd-asd',
          *    group_id     : 'asd-asd',
-         *    folder_name  : 'asdasd'
+         *    folder_name  : 'asdasd',
+         *    user_folder  : 'asdasd',
          *  }
          */
         var body = JSON.parse(req.body.data);
             async.parallel([
               /*********************** CREATE NEW FOLDER IN FYLE SYSTEM *********************** */
                 function(call){
-                    fs.mkdir(custom_paths.public_folder+'/'+body.group_folder+'/'+body.folder_name, function(err) {
+                    fs.mkdir(custom_paths.public_folder+'/'+body.user_folder+'/'+body.group_folder+'/'+body.folder_name, function(err) {
                                         if (err){
                                             if(err.code === 'EEXIST'){
                                                 call(err);
@@ -90,7 +92,7 @@ var upload = multer({
     var log_file = [];
          (function iterator(i){
            if(i >= body.length){
-             res.json({logfile:log_file})
+             res.json(log_file)
              return;
            } 
            console.log('times repeat - ' + i)
@@ -103,7 +105,7 @@ var upload = multer({
                                                  });
         /************************** REMOVE GALLERY FROM FYLE SYSTEM ********* */
                },function(gallery,call){
-                var gallery_folder = custom_paths.public_folder+'/'+gallery.group_folder+'/'+gallery.folder_name;
+                var gallery_folder = custom_paths.public_folder+'/'+gallery.user_folder+'/'+gallery.group_folder+'/'+gallery.folder_name;
                 fs.stat(gallery_folder, (err,stat) => {
                     if(stat){
                         fs.remove(gallery_folder, function(err){
@@ -118,16 +120,25 @@ var upload = multer({
                   });
         /************************** REMOVE GALLERY FROM DATA BASE ********* */
              },function(gallery,call){
-               GalleryModel.remove({_id:body[i] },function(err){
+               GalleryModel.remove({_id:body[i] },function(err,data){
                  if(err){ call(err); return; }
-                 log_file.push('Gallery removed from database.');
+                 log_file.push(data);
                  call(null,gallery);
                });
              },function(gallery,call){
+        /************************** REMOVER PICTUREs FROM DATABASE ********* */
+        console.log(gallery);
+                PictureModel.remove({gallery_id:gallery._id},function(err,data){
+                 if(err){ call(err); return; }
+                 log_file.push(data);
+                 call(null,gallery);
+                })
+             },function(gallery,call){
         /************************** UPDATES GROUP MOGEL "GALLERYS" NUMBER ********* */
-                groupModel.findOneAndUpdate({_id:gallery.group_id},{$inc:{gallerys:-1}},function(err,data){
+        console.log('update group')
+                groupModel.update({_id:gallery.group_id},{$inc:{'gallerys':-1}},function(err,data){
                     if(err){ call(err); return; }
-                    log_file.push('Group model "Gallerys" fields updated successfuly.');
+                    log_file.push(data);
                     call(null,data);
                 });
              }
@@ -155,11 +166,10 @@ var upload = multer({
  ###############################################################*/
         var data =JSON.parse(req.body.data)
         GalleryModel.update({_id:data.id},
-            {$set:{ name   : data.name,
-                route     : data.routeName}},
-                function(err,data){
-                    if(err){ call(err);return;}
-                    res.json(data)
+            {$set:{ name : data.name,
+                    route : data.routeName}},function(err,data){
+                        if(err){ call(err);return;}
+                        res.json(data)
                 });
      });
 
