@@ -4,7 +4,7 @@ var Schema = mongoose.Schema;
 var schema = new Schema({ name:      {type:String},     
                           forname:   {type:String},  
                           age:       {type:Number},      
-                          images:    {type:Array},
+                          images:    {type:Array,default:[null]},
                           folder_name:{type:String},
                           profesion: {type:String},
                           hobby:     {type:String},

@@ -76,10 +76,7 @@ ADD IMAGES TO GALLERY (working)
                     });
                 },function(data,call){
                     /*********************** UDATES GALLERY IMAGE NUMBER ***************** */
-                    var picture_in_gallery = data.gallery_images + 1;
-                    console.log(data)
-
-                        GalleryModel.update({_id:data._id},{gallery_images:picture_in_gallery},function(err,data){
+                        GalleryModel.update({_id:data._id},{$inc:{"gallery_images":1}},function(err,data){
                             if(err){ call(err);return; }
                             call(null,{message:"image pushed to database."});
                         });

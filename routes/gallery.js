@@ -6,12 +6,6 @@ var custom_paths = require('./paths');
 var GalleryModel = require('../mongoDB/gallery_schema');
 var PictureModel = require('../mongoDB/picture-schema');
 var groupModel = require('../mongoDB/group-model')
-var stream          = require ('stream');
-var multer          = require ('multer');
-var upload = multer({
-    inMemory: true
-});
-
 
 /*##############################################################
  LOAD ALL GALLERYS BY GROUP ID (working)

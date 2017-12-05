@@ -36,34 +36,79 @@ router.post('/add-member', function(req, res, next){
         res.json(call);
     });
 }).get('/get-members', function(req, res, next){
+    /*##############################################################
+        FINDS ALL USERS
+    ###############################################################*/
+        MyTeamModel.find(function(err,data){
+            if(err){res.json(err);return;}
+            res.json(data);
+        });
+  }).get('/:user_id', function(req, res, next){
+  /*##############################################################
+      FINDS SPECIFIC USER
+  ###############################################################*/
+        var user_id = req.params.user_id;
+        MyTeamModel.findOne({_id:user_id},function(err,data){
+            if(err){res.json(err);return;}
+            res.json(data);
+        });
+    }).put('/update-member',function(req,res,end){
 /*##############################################################
-    FINDS ALL USERS
-###############################################################*/
-    MyTeamModel.find(function(err,data){
-        if(err){res.json(err);return;}
-        res.json(data);
-    });
-}).put('/update-member',function(req,res,end){
-/*##############################################################
-    UPDATE EXISTING USER
+    UPDATE USER INFO
 ###############################################################*/
     var body = JSON.parse(req.body.data);
     MyTeamModel.update({_id:body._id},{ name: body.name,     
                                         forname: body.forname,  
                                         age: body.age,      
-                                        images: body.images,   
                                         profesion: body.profesion,
-                                        hobby: body.hobby,     
-                                        status: body.status,  
-                                        message: body.message,  
-                                        date: body.date,
-                                        days_left: body.days_left},
+                                        hobby: body.hobby},
                          function(err,data){
                          if(err){res.json(err);return;}
                          res.json(data);  
                    });
+}).put('/update-status',function(req,res,end){
+/*##############################################################
+    UPDATE USER STATUS
+###############################################################*/
+        var body = JSON.parse(req.body.data);
+        MyTeamModel.update({_id:body._id},{ status: body.status,  
+                                            message: body.message,  
+                                            date: body.date,
+                                            days_left: body.days_left},
+                             function(err,data){
+                             if(err){res.json(err);return;}
+                             res.json(data);  
+                       });
+    
+}).post('/add-pictures/:user_id',function(req,res,end){
+ /*##############################################################
+     ADD PICTURES TO USER 
+ ###############################################################*/
+ var user_id = req.params.user_id;
+ var body = JSON.parse(req.body.data);
+ MyTeamModel.update({_id:user_id},{ $push: { images: { $each: body } } },
+                      function(err,data){
+                      if(err){res.json(err);return;}
+                      res.json(data);  
+                });
 
-}).put('/delete-member',function(req,res,end){
+}).put('/remove-pictures/:user_id',function(req,res,end){
+    /*##############################################################
+        DELETES PICTURES FROM USER 
+    ###############################################################*/
+    var user_id = req.params.user_id;
+    var body = JSON.parse(req.body.data);
+    var pictures_id = [];
+    for(var picture of body)
+        pictures_id.push(picture._id)
+    console.log(pictures_id)
+    MyTeamModel.update({_id:user_id},{ $pull: { images:{_id:{$in:pictures_id}}} },
+                         function(err,data){
+                         if(err){res.json(err);return;}
+                         res.json(data);  
+                   });
+   
+   }).put('/delete-member',function(req,res,end){
 /*##############################################################
     DELETES USER
 ###############################################################*/
