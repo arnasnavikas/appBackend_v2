@@ -23,6 +23,16 @@ var groupModel = require('../mongoDB/group-model')
      if(err){ res.json(err); return; }
      res.json(data);
     });
+}).get('/user-id/:user_id', function(req, res, next) {
+    /*##############################################################
+     LOAD GALLERY BY USER ID 
+     ###############################################################*/
+     console.log(req.params.user_id)
+     GalleryModel.find({user_id:req.params.user_id},function(err,data){
+         if(err){ res.json(err); return; }
+            console.log(data)
+         res.json(data);
+        });
 }).get('/pictures/:gallery_id',function(req,res,next){
  /*##############################################################
  LOAD ONE GALLERY BY GALLERY ID

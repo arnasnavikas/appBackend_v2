@@ -21,7 +21,7 @@ var gallery_id = req.params.gallery_id;
         if(err){ res.json(err);return;}
         res.json(data)
     });
-}).post('/upload/:user_folder/:group_folder/:gallery_folder/:user_id/:gallery_id', upload.any(),  (req,res,next)=>{
+}).post('/upload/:user_folder/:group_folder/:gallery_folder/:user_id/:gallery_id/:created_at', upload.any(),  (req,res,next)=>{
 /*##########################################################
 ADD IMAGES TO GALLERY (working)
 ############################################################ */
@@ -32,6 +32,7 @@ ADD IMAGES TO GALLERY (working)
             var gallery_folder = req.params.gallery_folder;
             var user_id = req.params.user_id;
             var gallery_id = req.params.gallery_id;
+            var created_at = req.params.created_at;
             async.waterfall([
                     /*********************** WRITES PICTURE FILE DO HARD DISK ***************** */
                 function(call){
@@ -66,7 +67,8 @@ ADD IMAGES TO GALLERY (working)
                                   user_folder : user_folder,
                                   group_folder : data.group_folder,
                                   folder_name: gallery_folder,
-                                  gallery_name : data.name
+                                  gallery_name : data.name,
+                                  created: created_at
                             };
                         var newPicture = new PictureModel(image);
                         newPicture.save(function(err,picture){

@@ -34,8 +34,12 @@ var app = express();
 connectDB();
 
 var allowCrossDomain = function(req, res, next) {
+  var allowedOrigins =["http://localhost:4201","http://localhost:4200"];
+  var origin = req.headers.origin;
+  if(allowedOrigins.indexOf(origin) > -1){
+       res.setHeader('Access-Control-Allow-Origin', origin);
+  }
         res.setHeader("Access-Control-Allow-Methods", "POST, PUT, OPTIONS, DELETE, GET");
-        res.header("Access-Control-Allow-Origin", "http://localhost:4200");
         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
         res.header("Access-Control-Allow-Credentials", true);
         next();
