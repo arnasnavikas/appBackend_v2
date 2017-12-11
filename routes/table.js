@@ -13,6 +13,16 @@ router.get('/get-one/:id', function(req, res, next) {
                 if(err){ res.json(err); return;}
                 res.json(rows);
             });  
+}).get('/get-tables/:user_id', function(req, res, next) {
+/*#####################################################################
+ * finds multiple groups tables  
+#####################################################################*/
+    var _user_id = req.params.user_id;
+///*************************  FINDS ALL ROWS THAT BELONGS TO group_id ****** */
+            TableRowModel.find({user_id: _user_id},function(err,rows){
+                if(err){ res.json(err); return;}
+                res.json(rows);
+            });  
 }).post('/add-row/:user_id/:group_id',function(req,res,next){
 /*#####################################################################
  * add row to table 

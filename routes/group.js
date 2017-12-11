@@ -61,7 +61,16 @@ groupModel.find({user_id:user_id},function(err,data){
                if(err){call(err);return;}
                res.json(data);
            });
-    }).put('/add-description',function(req,res,next){
+}).get('/by-route/:route',function(req,res,next){
+/**#############################################
+ * suranda viena grupe
+ ###############################################*/
+    var route =req.params.route;
+    groupModel.findOne({route:route},function(err,data){
+               if(err){call(err);return;}
+               res.json(data);
+           });
+ }).put('/add-description',function(req,res,next){
  /**#############################################
   * atnaujina grupes aprasyma
   ###############################################*/
