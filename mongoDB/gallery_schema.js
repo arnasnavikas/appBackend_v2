@@ -11,7 +11,7 @@ var schema = new Schema({ group_id : String,
                           gallery_images: {type:Number,default: 0},
                           birth_time: {type: Number, default: Date.now()},
                           description: {type: String, default: 'No descrition'},
-                          index_img: {type:String, default:null}
+                          index_img: {type:String, default:"https://5.imimg.com/data5/NT/QU/MY-3701638/pvc-file-folder-500x500.jpg"}
              });
 
 var GalleryModel = mongoose.model('gallery', schema);

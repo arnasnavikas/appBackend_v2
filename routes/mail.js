@@ -4,7 +4,7 @@ var router       = express.Router();
 var async        = require('async');
 var messageModel = require('../mongoDB/mail_schema');
 
-router.post('/:id',function(req,res,next){
+router.post('/answer/:id',function(req,res,next){
 var message_id = req.params["id"];
 var body = JSON.parse(req.body.data);
 var server 	= email.server.connect({
@@ -61,6 +61,25 @@ var message	= {
         if(err){res.json(err);return;}
         res.json(data);
     });
+}).post("/send", function(req, res, next){
+    /**###################################################################
+    * Save message from client to database
+    * ################################################################### */ 
+var body = JSON.parse(req.body.data);
+var mailMessage = new messageModel(body);
+        mailMessage.save(function (err,data) {
+            if(err){ res.json(err); return; }
+            res.json(data);
+        });
+})
+/**###################################################################
+* Get one message
+* ################################################################### */ 
+.get('/:id',function(req, res, next){
+    var id_param = req.params.id;
+    messageModel.findOne({_id: id_param},function(err,data){
+        if(err){res.json(err);return;}
+        res.json(data);
+    });
 });
-
 module.exports = router;

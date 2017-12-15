@@ -7,13 +7,12 @@ var bodyParser = require('body-parser');
 var connectDB = require('./mongoDB/db');
 // routes
 // var delete_pictures = require('./routes/delete_pictures');
-var admin_messages = require('./routes/admin_messages');
-var client_messages = require('./routes/client_messages');
+// var admin_messages = require('./routes/admin_messages');
 // var gallery_create_new = require('./routes/gallery_create_new');
 // // var gallery_add_pictures = require('./routes/gallery_add_pictures');
 // var gallery_add_index = require('./routes/gallery_add_index');
 // var gallery_delete = require('./routes/gallery_delete');
-var send_mail = require('./routes/send_mail');
+// var send_mail = require('./routes/send_mail');
 // var get_gallerys = require('./routes/gallery_get')
 // var get_pictures = require('./routes/pictures_get');
 // var group_delete = require('./routes/group_delete');
@@ -27,7 +26,9 @@ var gallery = require('./routes/gallery');
 var picture = require('./routes/pictures');
 var table = require('./routes/table');
 var upload_pictures = require('./routes/upload-pictures');
-var team_member = require('./routes/my-team')
+var team_member = require('./routes/my-team');
+var mail = require('./routes/mail');
+
 //application
 var app = express();
 /**connecting mongo database */
@@ -58,6 +59,7 @@ app.use('/picture',picture);
 app.use('/upload-pictures',upload_pictures);
 app.use('/table', table);
 app.use('/my-team',team_member);
+app.use('/mail',mail);
 //old routes for delete later
 // app.use('/addPictures', gallery_add_pictures);
 // app.use('/addindex', gallery_add_index);
@@ -68,11 +70,11 @@ app.use('/my-team',team_member);
 // app.use('/group-delete/',group_delete);
 // app.use('/group-rename',group_rename);
 // app.use('/galerija', delete_pictures);
-app.use('/messages', admin_messages );
-app.use('/message', client_messages);
+// app.use('/messages', admin_messages );
+// app.use('/message', mail);
 // app.use('/new_gallery', gallery_create_new);
 // app.use('/pictures-by-gallery',get_pictures_by_gallery);
-app.use('/sendMail', send_mail);
+// app.use('/sendMail', send_mail);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -2,7 +2,7 @@
  *  paths for images loading 
  * ######################################################*/
 var localhost = {
-    public_folder   : 'C:/Users/Arnas Navikas/AppBackend/public',
+    public_folder   : 'C:/Users/Arnas/webProject/appBackend_v2/public',
     images_location : 'http://localhost:3000/',
     ipAddress: null
 };

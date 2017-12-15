@@ -61,7 +61,9 @@ router.post('/add-member', function(req, res, next){
                                         forname: body.forname,  
                                         age: body.age,      
                                         profesion: body.profesion,
-                                        hobby: body.hobby},
+                                        hobby: body.hobby,
+                                        phone:body.phone,
+                                        email: body.email},
                          function(err,data){
                          if(err){res.json(err);return;}
                          res.json(data);  
@@ -74,7 +76,8 @@ router.post('/add-member', function(req, res, next){
         MyTeamModel.update({_id:body._id},{ status: body.status,  
                                             message: body.message,  
                                             date: body.date,
-                                            days_left: body.days_left},
+                                            days_left: body.days_left,
+                                            updated: Date.now() },
                              function(err,data){
                              if(err){res.json(err);return;}
                              res.json(data);  

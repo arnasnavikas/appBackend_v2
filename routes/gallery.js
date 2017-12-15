@@ -27,10 +27,8 @@ var groupModel = require('../mongoDB/group-model')
     /*##############################################################
      LOAD GALLERY BY USER ID 
      ###############################################################*/
-     console.log(req.params.user_id)
      GalleryModel.find({user_id:req.params.user_id},function(err,data){
          if(err){ res.json(err); return; }
-            console.log(data)
          res.json(data);
         });
 }).get('/pictures/:gallery_id',function(req,res,next){
@@ -99,7 +97,6 @@ var groupModel = require('../mongoDB/group-model')
              res.json(log_file)
              return;
            } 
-           console.log('times repeat - ' + i)
            async.waterfall([
              function(call){
         /************************** FINDS GALLERY *************************** */
@@ -131,7 +128,6 @@ var groupModel = require('../mongoDB/group-model')
                });
              },function(gallery,call){
         /************************** REMOVER PICTUREs FROM DATABASE ********* */
-        console.log(gallery);
                 PictureModel.remove({gallery_id:gallery._id},function(err,data){
                  if(err){ call(err); return; }
                  log_file.push(data);
@@ -139,7 +135,6 @@ var groupModel = require('../mongoDB/group-model')
                 })
              },function(gallery,call){
         /************************** UPDATES GROUP MOGEL "GALLERYS" NUMBER ********* */
-        console.log('update group')
                 groupModel.update({_id:gallery.group_id},{$inc:{'gallerys':-1}},function(err,data){
                     if(err){ call(err); return; }
                     log_file.push(data);

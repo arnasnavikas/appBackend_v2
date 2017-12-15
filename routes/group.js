@@ -20,7 +20,6 @@ router.post('/create',function(req,res,next){
             let route = customPaths.public_folder+'/'+group_data.user_folder+'/'+group_data.folder_name
             fs.mkdir(route,function(err,data){
                 if(err){ call(err); return;}
-                console.log(Date.now())
                 call(null, group_data);   
             });
         },
@@ -144,10 +143,7 @@ Deletes multiple groups that specified in data:[] array
                 },function(data,call){
 ///*************************  DELETE FOLDER FROM FYLE SYSTEM **************************** */
                     var folderPath = customPaths.public_folder+'/'+data.user_folder+'/'+data.folder_name;
-                    console.log(folderPath)
                     fs.stat(folderPath, (err,stat) => {
-                        console.log(err)
-                        console.log(stat)
                         if(stat){
                             fs.remove(folderPath,function(err){
                                 if(err){errorLog.push(err);call(err);return;}
