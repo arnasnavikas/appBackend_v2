@@ -13,7 +13,8 @@ var schema = new Schema({  name:        {type: String},
                            gallery_name:{type: String},
                            description: {type: String,default :''},
                            size:        {type: Number},
-                           created:     {type: Number}
+                           created:     {type: Number},
+                           gallery_cover:{type:Boolean,default:false}
              });
 
 var PictureModel = mongoose.model('picture', schema);

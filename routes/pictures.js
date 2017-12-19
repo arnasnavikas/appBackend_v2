@@ -141,15 +141,67 @@ ADD IMAGES TO GALLERY (working)
           });
         })(0);
   }).put('/add-description',function(req,res,next){
+    /*##########################################################
+    * Updates image description
+    ############################################################ */
+        var body = JSON.parse(req.body.data);
+        PictureModel.update({_id:body.id},{description:body.description}
+                                ,function(err,data){
+                                  if(err){ res.json(err);return;}
+                                  res.json(data);
+                                });
+}).post('/add-cover',function(req,res,next){
 /*##########################################################
-* Updates image description
+* Updates gallery cover image 
 ############################################################ */
+
     var body = JSON.parse(req.body.data);
-    PictureModel.update({_id:body.id},{description:body.description}
-                            ,function(err,data){
-                              if(err){ res.json(err);return;}
-                              res.json(data);
-                            });
+    var logFile = []
+    async.waterfall([
+        function(call){
+        //  finds gallery,and returns previous index_img
+            GalleryModel.findOne({_id:body.gallery_id},{index_img:1},function(err,data){
+                if(err){logFile.push(err);call(err);return;}
+                logFile.push(data);
+                call(null,data);
+            });
+        },function(data,call){
+            // remove previous gallery cover from picture model
+            if(data.index_img && data.index_img.imgURL != "https://5.imimg.com/data5/NT/QU/MY-3701638/pvc-file-folder-500x500.jpg"){
+            PictureModel.findOneAndUpdate({_id:data.index_img._id},{gallery_cover: false},function(err,data){
+                    if(err){logFile.push(err);call(err);return;}
+                    // console.log(data)
+                    logFile.push(data);
+                    call(null,data);
+                });
+            }else
+                call(null,null)
+        },function(data,call){
+            // set gallery cover
+            GalleryModel.findOneAndUpdate({_id:body.gallery_id},{index_img:body},function(err,data){
+                if(err){logFile.push(err);call(err);return;}
+                // console.log(data)
+                logFile.push(data);
+                call(null,data);
+            })
+        },function(data,call){
+            PictureModel.findOneAndUpdate({_id:body._id},{gallery_cover:true},function(err,data){
+                if(err){logFile.push(err);call(err);return;}
+                // console.log(data)
+                logFile.push(data);
+                call(null,data);
+            })
+        }
+    ],function(err,call){
+      if(err){ res.json(err);return;}
+      console.log(logFile)
+      res.json(logFile);
+    });
+    // PictureModel.update({_id:body.id},{description:body.description}
+    //                         ,function(err,data){
+    //                           if(err){ res.json(err);return;}
+    //                           res.json(data);
+    //                         });
   });
   
 

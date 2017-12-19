@@ -66,8 +66,7 @@ var message	= {
     * Save message from client to database
     * ################################################################### */ 
 var body = JSON.parse(req.body.data);
-var mailMessage = new messageModel(body);
-        mailMessage.save(function (err,data) {
+new messageModel(body).save(function (err,data) {
             if(err){ res.json(err); return; }
             res.json(data);
         });
@@ -75,9 +74,9 @@ var mailMessage = new messageModel(body);
 /**###################################################################
 * Get one message
 * ################################################################### */ 
-.get('/:id',function(req, res, next){
-    var id_param = req.params.id;
-    messageModel.findOne({_id: id_param},function(err,data){
+.get('/new/:user_id',function(req, res, next){
+    var user = req.params.user_id;
+    messageModel.find({user_id: user,newMail:true},function(err,data){
         if(err){res.json(err);return;}
         res.json(data);
     });
