@@ -4,38 +4,32 @@ var router       = express.Router();
 var async        = require('async');
 var messageModel = require('../mongoDB/mail_schema');
 
-router.post('/answer/:id',function(req,res,next){
-var message_id = req.params["id"];
+router.post('/reply/:message-id',function(req,res,next){
 var body = JSON.parse(req.body.data);
 var server 	= email.server.connect({
    user:	"arnoadaila@gmail.com", 
-   password:"colapepsi", 
+   password: process.env.gmail, 
    host:	"smtp.gmail.com", 
    port:    "465",
    ssl:		true
 });
-
+email.message()
 var message	= {
-   text:	"", 
-   from:	"you <arnoadaila@gmail.com>", 
+   text:	body.message+" email: "+body.email, 
+   from:    '<arnoadaila@gmail.com>',
    to:		body.email,
-   cc:		"else <arnoadaila@gmail.com>",
-   subject:	 body.subject,
-   attachment: 
-   [
-      {data: body.message, alternative:true},
-   ]
+   subject:	'Apdailos darbai',
 };
  async.parallel([
      function(call){
-        messageModel.update({_id:message_id},{atsakymas:body.message},function(err,data){
-            if(err){ call(err); return;}
-            call(data);
+        new messageModel(body).save(function (err,data) {
+            if(err){ call(err); return; }
+            call(null,data);
         });
      },function(call){
         server.send(message, function(err, message) {
             if(err){ call(err); return; }
-            call(message);
+            call(null,message);
         });
 
      }
@@ -46,9 +40,9 @@ var message	= {
  /**###################################################################
 * UPDATES MESSAGES AS READED
 * ################################################################### */ 
-}).put('/:id',function(req,res,next){
+}).put('/readed-message/:id',function(req,res,next){
  var id = req.params.id;
- messageModel.update({_id:id},{ziuretas:true},function(err,data){
+ messageModel.update({_id:id},{newMail:false},function(err,data){
      if(err){res.json(err);return;}
     res.json(data);
  });
@@ -70,13 +64,48 @@ new messageModel(body).save(function (err,data) {
             if(err){ res.json(err); return; }
             res.json(data);
         });
-})
-/**###################################################################
-* Get one message
-* ################################################################### */ 
-.get('/new/:user_id',function(req, res, next){
+}).get('/all/:user_id',function(req, res, next){
+    /**###################################################################
+    * Get all  messages from selected user
+    * ################################################################### */ 
+    var user = req.params.user_id;
+    messageModel.find({user_id: user},function(err,data){
+        if(err){res.json(err);return;}
+        res.json(data);
+    });
+}).get('/readed/:user_id',function(req, res, next){
+    /**###################################################################
+    * Get all readed messages from selected user
+    * ################################################################### */ 
+    var user = req.params.user_id;
+    messageModel.find({user_id: user,newMail:false},function(err,data){
+        if(err){res.json(err);return;}
+        res.json(data);
+    });
+}).get('/replayed/:user_id',function(req, res, next){
+    /**###################################################################
+    * Get all  messages from selected user
+    * ################################################################### */ 
+    var user = req.params.user_id;
+    messageModel.find({user_id: user, answer: !undefined},function(err,data){
+        if(err){res.json(err);return;}
+        res.json(data);
+    });
+}).get('/new/:user_id',function(req, res, next){
+    /**###################################################################
+    * Get all new  messages from selected user
+    * ################################################################### */ 
     var user = req.params.user_id;
     messageModel.find({user_id: user,newMail:true},function(err,data){
+        if(err){res.json(err);return;}
+        res.json(data);
+    });
+}).get('/message/:message_id',function(req, res, next){
+    /**###################################################################
+    * Get one message 
+    * ################################################################### */ 
+    var message_id = req.params.message_id;
+    messageModel.find({_id: message_id},function(err,data){
         if(err){res.json(err);return;}
         res.json(data);
     });
