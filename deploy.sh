@@ -1,6 +1,6 @@
 #!/bin/bash
-comment=$1
+COMENT=$1
 git add .
-git commit -m 'from bash'
+git commit -m "$COMENT"
 git push origin 
-echo comment
+echo $COMENT
