@@ -152,9 +152,8 @@ ADD IMAGES TO GALLERY (working)
                                 });
 }).post('/add-cover',function(req,res,next){
 /*##########################################################
-* Updates gallery cover image 
+* Updates gallery cover image  
 ############################################################ */
-
     var body = JSON.parse(req.body.data);
     var logFile = []
     async.waterfall([
