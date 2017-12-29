@@ -4,13 +4,16 @@
 var localhost = {
     public_folder   : 'C:/Users/Arnas/webProject/appBackend_v2/public',
     images_location : 'http://localhost:3000/',
-    ipAddress: null
+    ipAddress: null,
 };
 var realServer = {
-    private_images_folder   : '/home/deploy/my_site/AppBackend/public/private_images/',
-    public_folder   : '/home/deploy/my_site/AppBackend/public/',
-    images_location : 'http://46.101.120.14:3000/',
-    private_images_location  : 'http://46.101.120.14:3000/private_images/',
-    ipAddress: '46.101.120.14'
+    public_folder   : '/home/arnas/appBackend_v2/public',
+    images_location : 'http://139.59.134.47:3000/',
+    ipAddress: null
 }
-module.exports = localhost;
+var myLaptoop ={
+    ipAddress: '192.168.1.67',
+    images_location : 'http://192.168.1.67:3000/',
+    public_folder   : 'C:/Users/Arnas/webProject/appBackend_v2/public',
+}
+module.exports = realServer;

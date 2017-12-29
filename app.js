@@ -60,6 +60,7 @@ app.use('/upload-pictures',upload_pictures);
 app.use('/table', table);
 app.use('/my-team',team_member);
 app.use('/mail',mail);
+
 //old routes for delete later
 // app.use('/addPictures', gallery_add_pictures);
 // app.use('/addindex', gallery_add_index);
